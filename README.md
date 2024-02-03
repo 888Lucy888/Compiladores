@@ -1,8 +1,8 @@
 # Compiler
 
-# Lexer
+## Lexer
 
-# Team:
+### Team:
 - Jessica Fernanda Isunza López
 - Carlos Manuel Vélez
 - Celia Lucia Castañeda Arizaga
