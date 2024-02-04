@@ -7,7 +7,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-
 import java.io.IOException;
 
 /**
@@ -17,11 +16,14 @@ public class App extends Application {
 
     private static Scene scene;
     private static Stage primaryStage;
+    private static PrimaryController primaryController;
 
     @Override
-    public void start(Stage stage) throws IOException {
+    public void start(@SuppressWarnings("exports") Stage stage) throws IOException {
         MenuBar menu = creatMenuBar();
-        Parent root = FXMLLoader.load(getClass().getResource("primary.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("primary.fxml"));
+        Parent root = loader.load();
+        primaryController = loader.getController();
 
         VBox layout = new VBox();
         layout.getChildren().addAll(menu, root);
@@ -49,8 +51,17 @@ public class App extends Application {
         // File operations
         Menu fileMenu = new Menu("File");
         MenuItem newFile = new MenuItem("New File");
+        newFile.setOnAction(event -> {
+            primaryController.newFile();
+        });
         MenuItem openFile = new MenuItem("Open File");
+        openFile.setOnAction(event -> {
+            primaryController.openFile();
+        });
         MenuItem saveFile = new MenuItem("Save File");
+        saveFile.setOnAction(event -> {
+            primaryController.saveFile();
+        });
 
         fileMenu.getItems().addAll(newFile, openFile, saveFile);
 
