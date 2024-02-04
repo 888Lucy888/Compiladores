@@ -1,16 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
 <?import javafx.geometry.Insets?>
 
-<VBox alignment="CENTER" spacing="20.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.lexer.PrimaryController">
+<VBox alignment="CENTER" spacing="0.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.lexer.PrimaryController">
    <children>
-      <Label text="Primary View" />
-      <Button fx:id="primaryButton" text="Switch to Secondary View" onAction="#switchToSecondary"/>
+   <HBox alignment="CENTER">
+      <children>
+      <VBox alignment="CENTER">
+         <children>
+            <TextArea fx:id="raw_code"/>
+         </children>
+      </VBox>
+      <TableView fx:id="output">
+         <columns>
+            <TableColumn text="Word" prefWidth="200">
+               <cellValueFactory>
+                  <PropertyValueFactory property="word_value" />
+               </cellValueFactory>
+            </TableColumn>
+            <TableColumn text="Token" prefWidth="200">
+               <cellValueFactory>
+                  <PropertyValueFactory property="token_value" />
+               </cellValueFactory>
+            </TableColumn>
+         </columns>
+      </TableView>
+      </children>
+   </HBox>
+   <TextArea fx:id="terminal" />
    </children>
-   <padding>
-      <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-   </padding>
 </VBox>
