@@ -4,8 +4,8 @@ public class Token {
     private String word;
     private String token;
     private int line;
-    
-    public Token(String word, String token, int line){
+
+    public Token(String word, String token, int line) {
         setWord(word);
         setToken(token);
         setLine(line);
