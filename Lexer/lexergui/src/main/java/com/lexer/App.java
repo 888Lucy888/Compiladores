@@ -28,7 +28,7 @@ public class App extends Application {
         VBox layout = new VBox();
         layout.getChildren().addAll(menu, root);
 
-        scene = new Scene(layout, 800, 600);
+        scene = new Scene(layout, 1200, 800);
         stage.setScene(scene);
         stage.show();
         primaryStage = stage;

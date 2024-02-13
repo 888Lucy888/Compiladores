@@ -35,10 +35,9 @@ public class Lexer {
     private static final int DELIMITER = 18;
     private static final int WHITE_SPACE = 19;
     private static final int NEW_LINE = 20;
-    private static final int STOP_SIGN = 21;
 
     private static final int[][] stateTable = {
-            { 7, 1, 1, 1, ERROR, 15, 15, 15, 15, 15, 15, 15, 15, 21, 16, 20, ERROR, 21, 22, STOP, STOP, STOP }, // InitialState
+            { 7, 1, 1, 1, ERROR, 15, 15, 15, 15, 15, 15, 15, 15, 21, 16, 19, ERROR, 21, 22, STOP, STOP, STOP }, // InitialState
             { 1, 1, 1, 1, 3, ERROR, ERROR, ERROR, 4, 2, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, STOP, STOP,
                     STOP, STOP, STOP }, // Integer
             { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR,
@@ -69,7 +68,7 @@ public class Lexer {
                     ERROR, ERROR, STOP, STOP, STOP, STOP, STOP },
             { 15, 15, 15, 15, ERROR, 15, 15, 15, 15, 15, 15, 15, 15, ERROR, ERROR, ERROR, ERROR, STOP, STOP, STOP, STOP,
                     STOP },
-            { 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, ERROR, ERROR, 17, 17, 17, 17, STOP, STOP },
+            { 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, ERROR, 17, 17, 17, 17, 17, STOP, STOP },
             { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, 18,
                     ERROR, ERROR, ERROR, ERROR, ERROR, STOP, STOP },
             { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR,
@@ -189,6 +188,14 @@ public class Lexer {
         return currentChar == ' ' || currentChar == '\t' || currentChar == '\n' || currentChar == '\r';
     }
 
+    private boolean isNewLine(char currentChar) {
+        return currentChar == '\n';
+    }
+
+    private boolean isPlus(char currentChar) {
+        return currentChar == '+';
+    }
+
     private void splitLine(int row, String line) {
         int state = 0;
         int index = 0;
@@ -196,34 +203,58 @@ public class Lexer {
         if (line.equals(""))
             return;
 
+        int nLine = row;
+
         String sub = "";
         do {
             currentChar = line.charAt(index);
+            if (isWhiteSpace(currentChar) && state == 0){
+                if (isNewLine(currentChar)) {
+                    nLine++;
+                }
+                index++;
+                continue;
+            }
             sub = sub + currentChar;
             int prevState = state;
             state = calculateNextState(state, currentChar);
+            System.out.println(currentChar + " current stage is " + state);
             index++;
 
-            if (state == STOP) {
+            if (state == STOP || isNewLine(currentChar)) {
                 sub = sub.substring(0, sub.length() - 1);
-                tokens.add(checkToken(prevState, sub, row));
+                tokens.add(checkToken(prevState, sub, nLine));
                 sub = "";
+                state = 0;
+                if (isNewLine(currentChar)) {
+                    nLine++;
+                }
+            }
+
+            if (isDelimiter(currentChar)){
+                tokens.add(new Token(currentChar + "", "DELIMITER", nLine));
+                state = 0;
+            }
+            else if (isOperator(currentChar) && (state != 5)){
+                tokens.add(new Token(currentChar + "", "OPERATOR", nLine));
                 state = 0;
             }
 
-            if (isDelimiter(currentChar))
-                tokens.add(new Token(currentChar + "", "DELIMITER", row));
-            else if (isOperator(currentChar))
-                tokens.add(new Token(currentChar + "", "OPERATOR", row));
-
         } while (index < line.length());
 
-        tokens.add(checkToken(state, sub, row));
+        if (state != 0) tokens.add(checkToken(state, sub, nLine));
     }
 
     private Token checkToken(int state, String word, int row) {
         // STATES
         Token newToken = null;
+
+        if (state == 15) {
+            for (String keyword : KEYWORDS) {
+                if (word.equals(keyword)) state = 25;
+            }
+        }
+
         switch(state) {
             case 1:
             case 7:
@@ -259,19 +290,20 @@ public class Lexer {
             case 22:
                 newToken = new Token(word, "DELIMITER", row);
                 break;
-            case 23:
-                newToken = new Token(word, "ERROR", row);
+            case 25:
+                newToken = new Token(word, "KEYWORD", row);
                 break;
+            default:
+                newToken = new Token(word, "ERROR", row, state);
         }
         return newToken;
     }
 
     private int calculateNextState(int state, char currentChar) {
-        if (isWhiteSpace(currentChar) || isDelimiter(currentChar) ||
-                isOperator(currentChar) || isQuotationMark(currentChar))
-            return stateTable[state][DELIMITER];
+        // if (isWhiteSpace(currentChar) || isDelimiter(currentChar))
+        //     return stateTable[state][DELIMITER];
         // Add is digit, is char, etc
-        else if (isACD(currentChar))
+        if (isACD(currentChar))
             return stateTable[state][A_C_D];
         else if (isB(currentChar))
             return stateTable[state][B];
@@ -307,28 +339,18 @@ public class Lexer {
             return  stateTable[state][WHITE_SPACE];
         else if (isDot(currentChar))
             return stateTable[state][DOT];
+        else if (isOperator(currentChar))
+            return stateTable[state][OPERATOR];
+        else if (isDelimiter(currentChar))
+            return stateTable[state][DELIMITER];
         return stateTable[state][OTHER];
     }
 
     public void run() {
         tokens = new Vector<Token>();
-        String line;
+        String line = text;
         int lineCount = 1;
-
-        do {
-            int lineEnd = text.indexOf(System.lineSeparator());
-            if (lineEnd >= 0) {
-                line = text.substring(0, lineEnd);
-                if (text.length() > 0) {
-                    text = text.substring(lineEnd + 1);
-                }
-            } else {
-                line = text;
-                text = "";
-            }
-            splitLine(lineCount, line);
-            lineCount++;
-        } while (!text.equals(""));
+        splitLine(lineCount, line);
     }
 
     public Vector<Token> getTokens() {

@@ -98,7 +98,7 @@ public class PrimaryController {
         entries.clear();
         for (Token token : tokens){
             System.out.println(token.toString());
-            entries.add(new TokenEntry(token.getWord(), token.getToken()));
+            entries.add(new TokenEntry(token.getWord(), token.getToken(), token.getLine() + ""));
         }
 
         output.setItems(entries);
