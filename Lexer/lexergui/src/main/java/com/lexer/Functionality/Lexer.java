@@ -107,15 +107,6 @@ public class Lexer {
         return false;
     }
 
-    private boolean isQuotationMark(char c) {
-        char[] quote = { '"', '\'' };
-        for (int x = 0; x < quote.length; x++) {
-            if (c == quote[x])
-                return true;
-        }
-        return false;
-    }
-
     private boolean isACD(char currentChar) {
         return ((currentChar == 'a' || currentChar == 'A') || (currentChar == 'c' || currentChar == 'C') || (currentChar == 'd' || currentChar == 'D'));
     }
@@ -218,7 +209,6 @@ public class Lexer {
             sub = sub + currentChar;
             int prevState = state;
             state = calculateNextState(state, currentChar);
-            System.out.println(currentChar + " current stage is " + state);
             index++;
 
             if (state == STOP || isNewLine(currentChar)) {
@@ -300,9 +290,6 @@ public class Lexer {
     }
 
     private int calculateNextState(int state, char currentChar) {
-        // if (isWhiteSpace(currentChar) || isDelimiter(currentChar))
-        //     return stateTable[state][DELIMITER];
-        // Add is digit, is char, etc
         if (isACD(currentChar))
             return stateTable[state][A_C_D];
         else if (isB(currentChar))

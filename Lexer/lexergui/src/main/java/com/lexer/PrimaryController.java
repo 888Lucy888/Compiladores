@@ -97,7 +97,6 @@ public class PrimaryController {
         Vector<Token> tokens = lexer.getTokens();
         entries.clear();
         for (Token token : tokens){
-            System.out.println(token.toString());
             entries.add(new TokenEntry(token.getWord(), token.getToken(), token.getLine() + ""));
         }
 
