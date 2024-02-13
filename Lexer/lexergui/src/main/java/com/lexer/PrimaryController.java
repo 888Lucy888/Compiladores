@@ -5,10 +5,17 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Optional;
+import java.util.Vector;
 
+import com.lexer.Functionality.Lexer;
+import com.lexer.Functionality.Token;
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -22,6 +29,9 @@ public class PrimaryController {
 
     @FXML
     private TextArea raw_code;
+    @FXML
+    private TableView<TokenEntry> output;
+    private ObservableList<TokenEntry> entries = FXCollections.observableArrayList();
 
     @FXML
     public void openFile() {
@@ -77,6 +87,20 @@ public class PrimaryController {
             e.printStackTrace();
             return "";
         }
+    }
+
+    @FXML
+    public void runFile() {
+        String text = raw_code.getText();
+        Lexer lexer = new Lexer(text);
+        lexer.run();
+        Vector<Token> tokens = lexer.getTokens();
+        entries.clear();
+        for (Token token : tokens){
+            entries.add(new TokenEntry(token.getWord(), token.getToken(), token.getLine() + ""));
+        }
+
+        output.setItems(entries);
     }
 
 }
