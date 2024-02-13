@@ -34,4 +34,9 @@ public class Token {
     public void setLine(int line) {
         this.line = line;
     }
+
+    @Override
+    public String toString() {
+        return "Word: " + this.word + " Token: " + this.token + ". At line [" + this.line + "]";
+    }
 }

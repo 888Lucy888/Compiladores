@@ -23,12 +23,12 @@
          <columns>
             <TableColumn text="Word" prefWidth="200">
                <cellValueFactory>
-                  <PropertyValueFactory property="word_value" />
+                  <PropertyValueFactory property="wordValue" />
                </cellValueFactory>
             </TableColumn>
             <TableColumn text="Token" prefWidth="200">
                <cellValueFactory>
-                  <PropertyValueFactory property="token_value" />
+                  <PropertyValueFactory property="tokenValue" />
                </cellValueFactory>
             </TableColumn>
          </columns>

@@ -10,7 +10,8 @@ public class Lexer {
             "if", "else", "switch", "case", "while", "do", "for", "true", "false", "print", "return" };
 
     // CONSTANTS
-    private static final int ERROR = -1;
+    private static final int ERROR = 23;
+    private static final int STOP = 24;
     private static final int OTHER = -2;
 
     private static final int ZERO = 0;
@@ -34,7 +35,7 @@ public class Lexer {
     private static final int DELIMITER = 18;
     private static final int WHITE_SPACE = 19;
     private static final int NEW_LINE = 20;
-    private static final int STOP = 21;
+    private static final int STOP_SIGN = 21;
 
     private static final int[][] stateTable = {
             { 7, 1, 1, 1, ERROR, 15, 15, 15, 15, 15, 15, 15, 15, 21, 16, 20, ERROR, 21, 22, STOP, STOP, STOP }, // InitialState
@@ -82,6 +83,7 @@ public class Lexer {
                     ERROR, ERROR, STOP, STOP, STOP, STOP, STOP },
             { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR,
                     ERROR, ERROR, STOP, STOP, STOP, STOP, STOP },
+            {STOP, STOP, STOP, STOP, STOP, STOP, STOP, STOP, STOP, STOP, STOP, STOP, STOP, STOP, STOP, STOP, STOP, STOP, STOP, STOP, STOP, STOP}
     };
 
     public Lexer(String text) {
@@ -90,8 +92,8 @@ public class Lexer {
 
     private boolean isDelimiter(char c) {
         char[] delimiters = { ',', ':', ';', '{', '}', '[', ']', '(', ')' };
-        for (int x = 0; x < delimiters.length; x++) {
-            if (c == delimiters[x])
+        for (char delimiter : delimiters) {
+            if (c == delimiter)
                 return true;
         }
         return false;
@@ -99,8 +101,8 @@ public class Lexer {
 
     private boolean isOperator(char c) {
         char[] operators = { '+', '-', '*', '/', '<', '>', '=', '!', '&', '|' };
-        for (int x = 0; x < operators.length; x++) {
-            if (c == operators[x])
+        for (char operator : operators) {
+            if (c == operator)
                 return true;
         }
         return false;
@@ -115,6 +117,10 @@ public class Lexer {
         return false;
     }
 
+    private boolean isACD(char currentChar) {
+        return ((currentChar == 'a' || currentChar == 'A') || (currentChar == 'c' || currentChar == 'C') || (currentChar == 'd' || currentChar == 'D'));
+    }
+
     private boolean isB(char currentChar) {
         return currentChar == 'b' || currentChar == 'B';
     }
@@ -127,8 +133,28 @@ public class Lexer {
         return currentChar == 'f' || currentChar == 'F';
     }
 
+    private boolean isG_WYZ(char currentChar) {
+        return ((currentChar >= 'g' && currentChar <= 'w') || (currentChar >= 'G' && currentChar <= 'W') || currentChar == 'y' || currentChar == 'Y' || currentChar == 'z' || currentChar == 'Z');
+    }
+
     private boolean isX(char currentChar) {
         return currentChar == 'x' || currentChar == 'X';
+    }
+
+    private boolean is0(char currentChar) {
+        return currentChar == '0';
+    }
+
+    private boolean is1(char currentChar) {
+        return currentChar == '1';
+    }
+
+    private boolean is2_7(char currentChar) {
+        return currentChar >= '2' && currentChar <= '7';
+    }
+
+    private boolean is8_9(char currentChar) {
+        return currentChar == '8' || currentChar == '9';
     }
 
     private boolean isDollarSign(char currentChar) {
@@ -137,6 +163,10 @@ public class Lexer {
 
     private boolean isUnderscore(char currentChar) {
         return currentChar == '_';
+    }
+
+    private boolean isDot(char currentChar) {
+        return currentChar == '.';
     }
 
     private boolean isHyphen(char currentChar) {
@@ -163,33 +193,74 @@ public class Lexer {
         int state = 0;
         int index = 0;
         char currentChar;
-        String string = "";
         if (line.equals(""))
             return;
 
+        String sub = "";
         do {
             currentChar = line.charAt(index);
+            sub = sub + currentChar;
+            int prevState = state;
             state = calculateNextState(state, currentChar);
-            if (!isDelimiter(currentChar) && !isOperator(currentChar))
-                string = string + currentChar;
             index++;
-        } while (index < line.length() && state != STOP);
 
+            if (state == STOP) {
+                sub = sub.substring(0, sub.length() - 1);
+                tokens.add(checkToken(prevState, sub, row));
+                sub = "";
+                state = 0;
+            }
+
+            if (isDelimiter(currentChar))
+                tokens.add(new Token(currentChar + "", "DELIMITER", row));
+            else if (isOperator(currentChar))
+                tokens.add(new Token(currentChar + "", "OPERATOR", row));
+
+        } while (index < line.length());
+
+        tokens.add(checkToken(state, sub, row));
+    }
+
+    private Token checkToken(int state, String word, int row) {
         // STATES
-        if (state == 3) {
-            tokens.add(new Token(string, "INTEGER", row));
-        } else {
-            if (!string.equals(" "))
-                tokens.add(new Token(string, "ERROR", row));
+        Token newToken = null;
+        switch(state) {
+            case 1:
+            case 7:
+                newToken = new Token(word, "INTEGER", row);
+                break;
+            case 2:
+            case 3:
+            case 6:
+            case 14:
+                newToken = new Token(word, "FLOAT", row);
+                break;
+            case 10:
+                newToken = new Token(word, "OCTAL", row);
+                break;
+            case 12:
+                newToken = new Token(word, "BINARY", row);
+                break;
+            case 13:
+                newToken = new Token(word, "HEXADECIMAL", row);
+                break;
+            case 15:
+                newToken = new Token(word, "ID", row);
+                break;
+            case 18:
+                newToken = new Token(word, "CHAR", row);
+                break;
+            case 20:
+                newToken = new Token(word, "STRING", row);
+                break;
+            case 21:
+                newToken = new Token(word, "OPERATOR", row);
+                break;
+            case 22:
+                newToken = new Token(word, "DELIMITER", row);
+                break;
         }
-
-        if (isDelimiter(currentChar))
-            tokens.add(new Token(currentChar + "", "DELIMITER", row));
-        else if (isOperator(currentChar))
-            tokens.add(new Token(currentChar + "", "OPERATOR", row));
-
-        if (index < line.length())
-            splitLine(row, line.substring(index));
+        return newToken;
     }
 
     private int calculateNextState(int state, char currentChar) {
@@ -197,14 +268,26 @@ public class Lexer {
                 isOperator(currentChar) || isQuotationMark(currentChar))
             return stateTable[state][DELIMITER];
         // Add is digit, is char, etc
+        else if (isACD(currentChar))
+            return stateTable[state][A_C_D];
         else if (isB(currentChar))
             return stateTable[state][B];
         else if (isE(currentChar))
             return stateTable[state][E];
         else if (isF(currentChar))
             return stateTable[state][F];
+        else if (isG_WYZ(currentChar))
+            return stateTable[state][G_TO_W_Y_Z];
         else if (isX(currentChar))
             return stateTable[state][X];
+        else if (is0(currentChar))
+            return stateTable[state][ZERO];
+        else if (is1(currentChar))
+            return stateTable[state][ONE];
+        else if (is2_7(currentChar))
+            return stateTable[state][TWO_TO_SEVEN];
+        else if (is8_9(currentChar))
+            return stateTable[state][EIGHT_NINE];
         else if (isDollarSign(currentChar))
             return stateTable[state][DOLLAR_SIGN];
         else if (isUnderscore(currentChar))
@@ -217,6 +300,10 @@ public class Lexer {
             return stateTable[state][DOUBLE_QUOTE];
         else if (isBackslash(currentChar))
             return stateTable[state][BACKSLASH];
+        else if (isWhiteSpace(currentChar))
+            return  stateTable[state][WHITE_SPACE];
+        else if (isDot(currentChar))
+            return stateTable[state][DOT];
         return stateTable[state][OTHER];
     }
 

@@ -64,9 +64,15 @@ public class App extends Application {
         });
 
         fileMenu.getItems().addAll(newFile, openFile, saveFile);
+        MenuItem runFile = new MenuItem("Run");
+        runFile.setOnAction(event -> {
+            primaryController.runFile();
+        });
+        Menu runMenu = new Menu("Build");
+        runMenu.getItems().add(runFile);
 
         MenuBar bar = new MenuBar();
-        bar.getMenus().addAll(fileMenu);
+        bar.getMenus().addAll(fileMenu, runMenu);
 
         return bar;
     }
