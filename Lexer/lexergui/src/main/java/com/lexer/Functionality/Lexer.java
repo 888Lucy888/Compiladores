@@ -259,6 +259,9 @@ public class Lexer {
             case 22:
                 newToken = new Token(word, "DELIMITER", row);
                 break;
+            case 23:
+                newToken = new Token(word, "ERROR", row);
+                break;
         }
         return newToken;
     }
