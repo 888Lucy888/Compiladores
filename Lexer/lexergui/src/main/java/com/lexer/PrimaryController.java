@@ -96,11 +96,21 @@ public class PrimaryController {
         lexer.run();
         Vector<Token> tokens = lexer.getTokens();
         entries.clear();
-        for (Token token : tokens){
+
+        int errorCount = 0;
+
+        for (Token token : tokens) {
             entries.add(new TokenEntry(token.getWord(), token.getToken(), token.getLine() + ""));
+            
+            if ("ERROR".equals(token.getToken())) {
+                errorCount++;
+            }
         }
 
         output.setItems(entries);
+
+        System.out.println("Número total de tokens: " + tokens.size());
+        System.out.println("Número de errores encontrados: " + errorCount);
     }
 
 }
