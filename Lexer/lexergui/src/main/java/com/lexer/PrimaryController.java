@@ -30,6 +30,8 @@ public class PrimaryController {
     @FXML
     private TextArea raw_code;
     @FXML
+    private TextArea terminal;
+    @FXML
     private TableView<TokenEntry> output;
     private ObservableList<TokenEntry> entries = FXCollections.observableArrayList();
 
@@ -109,8 +111,7 @@ public class PrimaryController {
 
         output.setItems(entries);
 
-        System.out.println("Número total de tokens: " + tokens.size());
-        System.out.println("Número de errores encontrados: " + errorCount);
+        terminal.setText("Words Found: " + tokens.size() + "\nErrors Found: " + errorCount + "\nCorrect Rate: " + (tokens.size() - errorCount) / tokens.size() * 100 + "%");
     }
 
 }
