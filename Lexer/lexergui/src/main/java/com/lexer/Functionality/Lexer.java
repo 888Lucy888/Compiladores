@@ -99,7 +99,7 @@ public class Lexer {
     }
 
     private boolean isOperator(char c) {
-        char[] operators = { '+', '-', '*', '/', '<', '>', '=', '!', '&', '|' };
+        char[] operators = { '+', '-', '*', '/', '<', '>', '=', '!', '&', '|', '%', '?' };
         for (char operator : operators) {
             if (c == operator)
                 return true;
@@ -341,7 +341,7 @@ public class Lexer {
             return stateTable[state][OPERATOR];
         else if (isDelimiter(currentChar))
             return stateTable[state][DELIMITER];
-        return stateTable[state][OTHER];
+        return stateTable[ERROR][0];
     }
 
     public void run() {

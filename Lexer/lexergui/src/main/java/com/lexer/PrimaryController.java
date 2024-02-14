@@ -111,7 +111,7 @@ public class PrimaryController {
 
         output.setItems(entries);
 
-        terminal.setText("Words Found: " + tokens.size() + "\nErrors Found: " + errorCount + "\nCorrect Rate: " + (tokens.size() - errorCount) / tokens.size() * 100 + "%");
+        terminal.setText("Words Found: " + tokens.size() + "\nErrors Found: " + errorCount + "\nCorrect Rate: " + (float)(tokens.size() - errorCount) / tokens.size() * 100.0 + "%");
     }
 
 }
