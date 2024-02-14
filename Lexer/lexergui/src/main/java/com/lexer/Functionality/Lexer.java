@@ -232,10 +232,12 @@ public class Lexer {
 
             if (isDelimiter(currentChar) && (state != 19 && state != 16)){
                 tokens.add(new Token(currentChar + "", "DELIMITER", nLine));
+                sub = "";
                 state = 0;
             }
             else if (isOperator(currentChar) && ((state != 19 && state != 16 && state != 5))){
                 tokens.add(new Token(currentChar + "", "OPERATOR", nLine));
+                sub = "";
                 state = 0;
             }
 
