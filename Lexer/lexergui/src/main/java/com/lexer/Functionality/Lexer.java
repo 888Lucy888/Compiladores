@@ -73,7 +73,7 @@ public class Lexer {
                     ERROR, ERROR, ERROR, ERROR, ERROR, STOP, STOP },
             { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR,
                     ERROR, ERROR, STOP, STOP, STOP, STOP, STOP },
-            { 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, ERROR, 20, 19, 19, 19, 19, STOP, STOP },
+            { 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 20, 19, 19, 19, 19, STOP, STOP },
             { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR,
                     ERROR, ERROR, STOP, STOP, STOP, STOP, STOP },
             { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR, ERROR,
@@ -99,7 +99,7 @@ public class Lexer {
     }
 
     private boolean isOperator(char c) {
-        char[] operators = { '+', '-', '*', '/', '<', '>', '=', '!', '&', '|' };
+        char[] operators = { '+', '-', '*', '/', '<', '>', '=', '!', '&', '|', '%', '?' };
         for (char operator : operators) {
             if (c == operator)
                 return true;
@@ -186,6 +186,15 @@ public class Lexer {
     private boolean isPlus(char currentChar) {
         return currentChar == '+';
     }
+    // Function to check if is a KeyWord
+    public static boolean isKeyword(String word) {
+        for (String keyword : KEYWORDS) {
+            if (keyword.equals(word)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     private void splitLine(int row, String line) {
         int state = 0;
@@ -221,12 +230,14 @@ public class Lexer {
                 }
             }
 
-            if (isDelimiter(currentChar)){
+            if (isDelimiter(currentChar) && (state != 19 && state != 16)){
                 tokens.add(new Token(currentChar + "", "DELIMITER", nLine));
+                sub = "";
                 state = 0;
             }
-            else if (isOperator(currentChar) && (state != 5)){
+            else if (isOperator(currentChar) && ((state != 19 && state != 16 && state != 5))){
                 tokens.add(new Token(currentChar + "", "OPERATOR", nLine));
+                sub = "";
                 state = 0;
             }
 
@@ -330,7 +341,7 @@ public class Lexer {
             return stateTable[state][OPERATOR];
         else if (isDelimiter(currentChar))
             return stateTable[state][DELIMITER];
-        return stateTable[state][OTHER];
+        return stateTable[ERROR][0];
     }
 
     public void run() {
