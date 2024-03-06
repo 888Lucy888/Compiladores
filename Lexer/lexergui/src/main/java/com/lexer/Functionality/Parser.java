@@ -23,7 +23,7 @@ public class Parser {
 
     private static void clearTree(TreeItem<String> root) {
         clearChildren(root);
-    }    
+    }
 
     private static void error(int type) {
         System.err.println("\nERROR: MISSING ");
@@ -51,7 +51,7 @@ public class Parser {
     public static TreeItem<String> parse() {
 
         currentToken = 0;
-        
+
         clearTree(root);
 
         RULE_PROGRAM();
@@ -89,11 +89,10 @@ public class Parser {
             current_level = child;
             RULE_EXPRESSION();
 
-            if (tokens.get(currentToken).getWord().equals(";")){
+            if (tokens.get(currentToken).getWord().equals(";")) {
                 current_level.getChildren().add(new TreeItem<String>(";"));
                 currentToken++;
-            }
-            else
+            } else
                 error(3);
         }
     }
@@ -223,6 +222,9 @@ public class Parser {
         } else if (tokens.get(currentToken).getToken().equals("ID")) {
             current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
             currentToken++;
+        } else if (tokens.get(currentToken).getToken().equals("KEYWORD")) {
+            current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
+            currentToken++;
         } else if (tokens.get(currentToken).getWord().equals("(")) {
             current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
             currentToken++;
@@ -232,9 +234,11 @@ public class Parser {
                 currentToken++;
             } else
                 error(4);
-        } else
+        } else {
             error(5);
-        
+            currentToken++;
+        }
+
         current_level = child.getParent();
 
     }
