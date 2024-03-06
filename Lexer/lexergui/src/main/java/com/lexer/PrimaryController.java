@@ -30,6 +30,8 @@ public class PrimaryController {
     @FXML
     private TextArea raw_code;
     @FXML
+    private TextArea terminal;
+    @FXML
     private TableView<TokenEntry> output;
     private ObservableList<TokenEntry> entries = FXCollections.observableArrayList();
 
@@ -96,11 +98,20 @@ public class PrimaryController {
         lexer.run();
         Vector<Token> tokens = lexer.getTokens();
         entries.clear();
-        for (Token token : tokens){
+
+        int errorCount = 0;
+
+        for (Token token : tokens) {
             entries.add(new TokenEntry(token.getWord(), token.getToken(), token.getLine() + ""));
+            
+            if ("ERROR".equals(token.getToken())) {
+                errorCount++;
+            }
         }
 
         output.setItems(entries);
+
+        terminal.setText("Words Found: " + tokens.size() + "\nErrors Found: " + errorCount + "\nCorrect Rate: " + (float)(tokens.size() - errorCount) / tokens.size() * 100.0 + "%");
     }
 
 }
