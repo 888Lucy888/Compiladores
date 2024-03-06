@@ -8,38 +8,52 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TreeView?>
 <?import javafx.geometry.Insets?>
 
 <VBox alignment="CENTER" spacing="0.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.lexer.PrimaryController">
-   <children>
-   <HBox alignment="CENTER">
-      <children>
-      <VBox alignment="CENTER">
-         <children>
-            <TextArea fx:id="raw_code"/>
-         </children>
-      </VBox>
-      <TableView fx:id="output">
-         <columns>
-            <TableColumn text="Word" prefWidth="200">
-               <cellValueFactory>
-                  <PropertyValueFactory property="wordValue" />
-               </cellValueFactory>
-            </TableColumn>
-            <TableColumn text="Token" prefWidth="200">
-               <cellValueFactory>
-                  <PropertyValueFactory property="tokenValue" />
-               </cellValueFactory>
-            </TableColumn>
-            <TableColumn text="Line" prefWidth="200">
-               <cellValueFactory>
-                  <PropertyValueFactory property="lineValue" />
-               </cellValueFactory>
-            </TableColumn>
-         </columns>
-      </TableView>
-      </children>
-   </HBox>
-   <TextArea fx:id="terminal" editable="false" style="-fx-control-inner-background:#000000; -fx-font-family: Consolas; -fx-highlight-fill: #00ff00; -fx-highlight-text-fill: #000000; -fx-text-fill: #00ff00; " />
-   </children>
+    <children>
+        <HBox alignment="CENTER">
+            <children>
+                <VBox alignment="CENTER">
+                    <children>
+                        <TextArea fx:id="raw_code"/>
+                    </children>
+                </VBox>
+                <TabPane>
+                    <Tab text="Token List">
+                        <content>
+                            <TableView fx:id="output">
+                                <columns>
+                                    <TableColumn text="Word" prefWidth="200">
+                                        <cellValueFactory>
+                                            <PropertyValueFactory property="wordValue" />
+                                        </cellValueFactory>
+                                    </TableColumn>
+                                    <TableColumn text="Token" prefWidth="200">
+                                        <cellValueFactory>
+                                            <PropertyValueFactory property="tokenValue" />
+                                        </cellValueFactory>
+                                    </TableColumn>
+                                    <TableColumn text="Line" prefWidth="200">
+                                        <cellValueFactory>
+                                            <PropertyValueFactory property="lineValue" />
+                                        </cellValueFactory>
+                                    </TableColumn>
+                                </columns>
+                            </TableView>
+                        </content>
+                    </Tab>
+                    <Tab text="Tree View">
+                        <content>
+                            <TreeView fx:id="treeView"/>
+                        </content>
+                    </Tab>
+                </TabPane>
+            </children>
+        </HBox>
+        <TextArea fx:id="terminal" editable="false" style="-fx-control-inner-background:#000000; -fx-font-family: Consolas; -fx-highlight-fill: #00ff00; -fx-highlight-text-fill: #000000; -fx-text-fill: #00ff00; " />
+    </children>
 </VBox>

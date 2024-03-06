@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.Vector;
 
 import com.lexer.Functionality.Lexer;
+import com.lexer.Functionality.Parser;
 import com.lexer.Functionality.Token;
 
 import javafx.collections.FXCollections;
@@ -17,6 +18,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.TreeView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -33,6 +35,8 @@ public class PrimaryController {
     private TextArea terminal;
     @FXML
     private TableView<TokenEntry> output;
+    @FXML
+    private TreeView<String> treeView;
     private ObservableList<TokenEntry> entries = FXCollections.observableArrayList();
 
     @FXML
@@ -109,7 +113,10 @@ public class PrimaryController {
             }
         }
 
+        Parser.setTokens(tokens);
+
         output.setItems(entries);
+        treeView.setRoot(Parser.parse());
 
         terminal.setText("Words Found: " + tokens.size() + "\nErrors Found: " + errorCount + "\nCorrect Rate: " + (float)(tokens.size() - errorCount) / tokens.size() * 100.0 + "%");
     }
