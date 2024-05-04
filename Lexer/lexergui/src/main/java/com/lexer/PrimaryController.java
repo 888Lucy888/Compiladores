@@ -120,7 +120,7 @@ public class PrimaryController {
         treeView.setRoot(Parser.parse());
 
         terminal.setText("----------- LEXER -----------\n " +
-                "Words Found: " + tokens.size() + "\nErrors Found: " + errorCount + "\nCorrect Rate: " +
+                "Words Found: " + tokens.size() + "\n Errors Found: " + errorCount + "\n Correct Rate: " +
                 (float) (tokens.size() - errorCount) / tokens.size() * 100.0 + "%" +
                 "\n----------- PARSER -----------\n " +
                 "Possible Errors: ");

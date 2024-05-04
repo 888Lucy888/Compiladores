@@ -30,40 +30,42 @@ public class Parser {
     }
 
     private static void error(int type) {
-        String errMsg = "\nERROR: Near " + tokens.get(currentToken).getWord() + " MISSING ";
-        switch (type) {
-            case 1:
-                errMsg += "{";
-                break;
-            case 2:
-                errMsg += "}";
-                break;
-            case 3:
-                errMsg += ";";
-                break;
-            case 4:
-                errMsg += ")";
-                break;
-            case 5:
-                errMsg += "VARTYPE | ID | ()";
-                break;
-            case 6:
-                errMsg += "Invalid Body";
-                break;
-            case 7:
-                errMsg += "=";
-                break;
-            case 8:
-                errMsg += "ID";
-                break;
-            case 9:
-                errMsg += "(";
-                break;
-            default:
-                break;
+        if (isCurrentTokenValid()) {
+            String errMsg = "\nLine " + (tokens.get(currentToken).getLine() - 1) + ": expected ";
+            switch (type) {
+                case 1:
+                    errMsg += "{";
+                    break;
+                case 2:
+                    errMsg += "}";
+                    break;
+                case 3:
+                    errMsg += ";";
+                    break;
+                case 4:
+                    errMsg += ")";
+                    break;
+                case 5:
+                    errMsg += "VARTYPE | ID | ()";
+                    break;
+                case 6:
+                    errMsg += "valid Body";
+                    break;
+                case 7:
+                    errMsg += "=";
+                    break;
+                case 8:
+                    errMsg += "ID";
+                    break;
+                case 9:
+                    errMsg += "(";
+                    break;
+                default:
+                    break;
+            }
+            errorHandler.storeError(errMsg);
+            System.err.println(errMsg);
         }
-        errorHandler.storeError(errMsg);
-        System.err.println(errMsg);
     }
 
     private static boolean isCurrentTokenValid() {
@@ -111,7 +113,11 @@ public class Parser {
                     currentToken++;
                 } else
                     error(3);
-            } else if (isCurrentTokenValid() && isVarType(tokens.get(currentToken).getToken())) {
+            } else if (isCurrentTokenValid() &&
+                    (isVarType(tokens.get(currentToken).getToken()) ||
+                            tokens.get(currentToken).getToken().equals("KEYWORD"))) {
+                // } else if (isCurrentTokenValid() &&
+                // isVarType(tokens.get(currentToken).getToken())) {
                 RULE_VARIABLE();
                 if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals(";")) {
                     current_level.getChildren().add(new TreeItem<String>(";"));
@@ -164,7 +170,9 @@ public class Parser {
         current_level.getChildren().add(child);
         current_level = child;
 
-        if (isCurrentTokenValid() && isVarType(tokens.get(currentToken).getToken())) {
+        if (isCurrentTokenValid() &&
+                (isVarType(tokens.get(currentToken).getToken()) ||
+                        tokens.get(currentToken).getToken().equals("KEYWORD"))) {
             currentToken++;
             if (isCurrentTokenValid() && tokens.get(currentToken).getToken().equals("ID")) {
                 currentToken++;
@@ -232,6 +240,7 @@ public class Parser {
         if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("return")) {
             current_level.getChildren().add(new TreeItem<String>("return"));
             currentToken++;
+            RULE_EXPRESSION();
         }
     }
 
