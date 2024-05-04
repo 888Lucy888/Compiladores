@@ -1,13 +1,17 @@
 package com.lexer.Functionality;
 
 import java.util.Vector;
+
+import com.lexer.ExtraModules.ErrorHandler;
+
 import javafx.scene.control.TreeItem;
 
 public class Parser {
     private static Vector<Token> tokens;
     private static int currentToken = 0;
-    private static TreeItem<String> root = new TreeItem<>("PROGRAM");
+    public static ErrorHandler errorHandler = new ErrorHandler("PARSER");
 
+    private static TreeItem<String> root = new TreeItem<>("PROGRAM");
     private static TreeItem<String> current_level;
 
     public static void setTokens(Vector<Token> tokens) {
@@ -26,38 +30,40 @@ public class Parser {
     }
 
     private static void error(int type) {
-        System.err.println("\nERROR: MISSING ");
+        String errMsg = "\nERROR: Near " + tokens.get(currentToken).getWord() + " MISSING ";
         switch (type) {
             case 1:
-                System.err.println("{");
+                errMsg += "{";
                 break;
             case 2:
-                System.err.println("}");
+                errMsg += "}";
                 break;
             case 3:
-                System.err.println(";");
+                errMsg += ";";
                 break;
             case 4:
-                System.err.println(")");
+                errMsg += ")";
                 break;
             case 5:
-                System.err.println("VARTYPE | ID | ()");
+                errMsg += "VARTYPE | ID | ()";
                 break;
             case 6:
-                System.err.println("Invalid Body");
+                errMsg += "Invalid Body";
                 break;
             case 7:
-                System.err.println("Missing =");
+                errMsg += "=";
                 break;
             case 8:
-                System.err.println("Missing ID");
+                errMsg += "ID";
                 break;
             case 9:
-                System.err.println("(");
+                errMsg += "(";
                 break;
             default:
                 break;
         }
+        errorHandler.storeError(errMsg);
+        System.err.println(errMsg);
     }
 
     public static TreeItem<String> parse() {
@@ -65,7 +71,7 @@ public class Parser {
         currentToken = 0;
 
         clearTree(root);
-
+        current_level = root;
         RULE_PROGRAM();
 
         return root;
@@ -79,8 +85,6 @@ public class Parser {
         } else {
             error(1);
         }
-
-        current_level = root;
 
         RULE_BODY();
 
