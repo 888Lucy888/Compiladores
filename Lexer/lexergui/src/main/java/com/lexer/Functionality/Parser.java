@@ -114,7 +114,7 @@ public class Parser {
                 } else
                     error(3);
             } else if (isCurrentTokenValid() &&
-                    (isVarType(tokens.get(currentToken).getToken()) ||
+                    (isVarType(tokens.get(currentToken).getWord()) &&
                             tokens.get(currentToken).getToken().equals("KEYWORD"))) {
                 // } else if (isCurrentTokenValid() &&
                 // isVarType(tokens.get(currentToken).getToken())) {
@@ -154,6 +154,7 @@ public class Parser {
         current_level = child;
 
         if (isCurrentTokenValid() && tokens.get(currentToken).getToken().equals("ID")) {
+            current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
             currentToken++;
             if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("=")) {
                 current_level.getChildren().add(new TreeItem<String>("="));
@@ -171,10 +172,12 @@ public class Parser {
         current_level = child;
 
         if (isCurrentTokenValid() &&
-                (isVarType(tokens.get(currentToken).getToken()) ||
+                (isVarType(tokens.get(currentToken).getWord()) &&
                         tokens.get(currentToken).getToken().equals("KEYWORD"))) {
+            current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
             currentToken++;
             if (isCurrentTokenValid() && tokens.get(currentToken).getToken().equals("ID")) {
+                current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
                 currentToken++;
             } else
                 error(8);
@@ -404,16 +407,13 @@ public class Parser {
 
     }
 
-    private static boolean isVarType(String token) {
-        if (token.equals("INTEGER") ||
-                token.equals("FLOAT") ||
-                token.equals("OCTAL") ||
-                token.equals("BINARY") ||
-                token.equals("HEXADECIMAL") ||
-                token.equals("CHAR") ||
-                token.equals("STRING")) {
+    private static boolean isVarType(String token_word) {
+        if (token_word.equals("int") ||
+                token_word.equals("float") ||
+                token_word.equals("char") ||
+                token_word.equals("string") ||
+                token_word.equals("bool"))
             return true;
-        }
         return false;
     }
 }
