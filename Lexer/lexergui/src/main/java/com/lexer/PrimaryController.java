@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.util.Optional;
 import java.util.Vector;
 
+import com.lexer.ExtraModules.ErrorHandler;
 import com.lexer.Functionality.Lexer;
 import com.lexer.Functionality.Parser;
 import com.lexer.Functionality.Token;
@@ -107,7 +108,7 @@ public class PrimaryController {
 
         for (Token token : tokens) {
             entries.add(new TokenEntry(token.getWord(), token.getToken(), token.getLine() + ""));
-            
+
             if ("ERROR".equals(token.getToken())) {
                 errorCount++;
             }
@@ -118,7 +119,15 @@ public class PrimaryController {
         output.setItems(entries);
         treeView.setRoot(Parser.parse());
 
-        terminal.setText("Words Found: " + tokens.size() + "\nErrors Found: " + errorCount + "\nCorrect Rate: " + (float)(tokens.size() - errorCount) / tokens.size() * 100.0 + "%");
+        terminal.setText("----------- LEXER -----------\n " +
+                "Words Found: " + tokens.size() + "\n Errors Found: " + errorCount + "\n Correct Rate: " +
+                (float) (tokens.size() - errorCount) / tokens.size() * 100.0 + "%" +
+                "\n----------- PARSER -----------\n " +
+                "Possible Errors: ");
+        ErrorHandler errorHandler = Parser.errorHandler;
+        for (String error : errorHandler.getErrors()) {
+            terminal.appendText(error + "");
+        }
     }
 
 }
