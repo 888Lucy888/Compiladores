@@ -60,6 +60,9 @@ public class Parser {
                 case 9:
                     errMsg += "(";
                     break;
+                case 10:
+                    errMsg += "while";
+                    break;
                 default:
                     break;
             }
@@ -130,7 +133,15 @@ public class Parser {
                     error(3);
             } else if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("while")) {
                 RULE_WHILE();
-            } else if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("if")) {
+            } else if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("do")){
+                RULE_DO_WHILE();
+                if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals(";")) {
+                    current_level.getChildren().add(new TreeItem<String>(";"));
+                    currentToken++;
+                } else
+                    error(3);
+            }
+            else if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("if")) {
                 RULE_IF();
             } else if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("return")) {
                 RULE_RETURN();
@@ -217,6 +228,35 @@ public class Parser {
                     error(4);
             } else
                 error(9);
+        }
+        current_level = child.getParent();
+    }
+
+    private static void RULE_DO_WHILE() {
+        TreeItem<String> child = new TreeItem<String>("RULE DO WHILE");
+        current_level.getChildren().add(child);
+        current_level = child;
+        
+        if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("do")) {
+            current_level.getChildren().add(new TreeItem<String>("do"));
+            currentToken++;
+            RULE_PROGRAM();
+            if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("while")){
+                current_level.getChildren().add(new TreeItem<String>("while"));
+                currentToken++;
+                if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("(")) {
+                    current_level.getChildren().add(new TreeItem<String>("("));
+                    currentToken++;
+                    RULE_EXPRESSION();
+                    if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals(")")) {
+                        current_level.getChildren().add(new TreeItem<String>(")"));
+                        currentToken++;
+                    } else
+                        error(4);
+                } else
+                    error(9);
+            } else
+                error(10);
         }
         current_level = child.getParent();
     }
