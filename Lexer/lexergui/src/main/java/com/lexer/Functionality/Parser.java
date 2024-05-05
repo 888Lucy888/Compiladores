@@ -101,10 +101,10 @@ public class Parser {
     }
 
     private static void RULE_BODY() {
+        TreeItem<String> child = new TreeItem<>("BODY");
+        current_level.getChildren().add(child);
+        current_level = child;
         while (isCurrentTokenValid() && !tokens.get(currentToken).getWord().equals("}")) {
-            TreeItem<String> child = new TreeItem<>("BODY");
-            current_level.getChildren().add(child);
-            current_level = child;
 
             if (isCurrentTokenValid() && tokens.get(currentToken).getToken().equals("ID")) {
                 RULE_ASSIGNMENT();
@@ -144,7 +144,7 @@ public class Parser {
                     error(3);
             } else
                 error(6);
-            currentToken++;
+            //currentToken++;
         }
     }
 
@@ -181,7 +181,13 @@ public class Parser {
                 currentToken++;
             } else
                 error(8);
+            if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("=")) {
+                current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
+                currentToken++;
+                RULE_EXPRESSION();
+            }
         }
+        current_level = child.getParent();
     }
 
     private static void RULE_WHILE() {
@@ -380,7 +386,7 @@ public class Parser {
         current_level.getChildren().add(child);
         current_level = child;
 
-        if (isCurrentTokenValid() && isVarType(tokens.get(currentToken).getToken())) {
+        if (isCurrentTokenValid() && isDataType(tokens.get(currentToken).getToken())) {
             current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
             currentToken++;
         } else if (isCurrentTokenValid() && tokens.get(currentToken).getToken().equals("ID")) {
@@ -416,4 +422,13 @@ public class Parser {
             return true;
         return false;
     }
+
+    private static boolean isDataType(String token) {
+        if (token.equals("INTEGER") || token.equals("FLOAT") || token.equals("CHAR") ||
+            token.equals("STRING") || token.equals("HEXADECIMAL") || token.equals("OCTAL") ||
+            token.equals("BINARY") || token.equals("BOOLEAN"))
+            return true;
+        return false;
+    }
+
 }
