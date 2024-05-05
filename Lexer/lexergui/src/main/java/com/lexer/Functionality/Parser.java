@@ -11,7 +11,7 @@ public class Parser {
     private static int currentToken = 0;
     public static ErrorHandler errorHandler = new ErrorHandler("PARSER");
 
-    private static TreeItem<String> root = new TreeItem<>("PROGRAM");
+    private static TreeItem<String> root = new TreeItem<>("FILE");
     private static TreeItem<String> current_level;
 
     public static void setTokens(Vector<Token> tokens) {
@@ -83,8 +83,11 @@ public class Parser {
     }
 
     private static void RULE_PROGRAM() {
+        TreeItem<String> child = new TreeItem<>("PROGRAM");
+        current_level.getChildren().add(child);
+        current_level = child;
         if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("{")) {
-            root.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
+            current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
             currentToken++;
         } else {
             error(1);
@@ -93,11 +96,12 @@ public class Parser {
         RULE_BODY();
 
         if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("}")) {
-            root.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
+            current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
             currentToken++;
         } else {
             error(2);
         }
+        current_level = child.getParent();
     }
 
     private static void RULE_BODY() {
@@ -146,6 +150,7 @@ public class Parser {
                 error(6);
             //currentToken++;
         }
+        current_level = child.getParent();
     }
 
     private static void RULE_ASSIGNMENT() {
