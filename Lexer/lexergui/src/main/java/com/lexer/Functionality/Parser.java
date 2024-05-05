@@ -164,6 +164,8 @@ public class Parser {
                 error(7);
             }
         }
+
+        current_level = child.getParent();
     }
 
     private static void RULE_VARIABLE() {
@@ -211,6 +213,7 @@ public class Parser {
             } else
                 error(9);
         }
+        current_level = child.getParent();
     }
 
     private static void RULE_IF() {
@@ -239,6 +242,7 @@ public class Parser {
             } else
                 error(9);
         }
+        current_level = child.getParent();
     }
 
     private static void RULE_RETURN() {
@@ -251,6 +255,7 @@ public class Parser {
             currentToken++;
             RULE_EXPRESSION();
         }
+        current_level = child.getParent();
     }
 
     private static void RULE_PRINT() {
@@ -273,6 +278,7 @@ public class Parser {
             } else
                 error(9);
         }
+        current_level = child.getParent();
     }
 
     private static void RULE_EXPRESSION() {
