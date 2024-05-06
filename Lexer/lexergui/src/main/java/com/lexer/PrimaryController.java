@@ -7,7 +7,10 @@ import java.nio.file.Files;
 import java.util.Optional;
 import java.util.Vector;
 
+import com.lexer.ExtraModules.ErrorHandler;
 import com.lexer.Functionality.Lexer;
+import com.lexer.Functionality.Parser;
+import com.lexer.Functionality.SemanticAnalyzer;
 import com.lexer.Functionality.Token;
 
 import javafx.collections.FXCollections;
@@ -17,6 +20,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.TreeView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -30,7 +34,11 @@ public class PrimaryController {
     @FXML
     private TextArea raw_code;
     @FXML
+    private TextArea terminal;
+    @FXML
     private TableView<TokenEntry> output;
+    @FXML
+    private TreeView<String> treeView;
     private ObservableList<TokenEntry> entries = FXCollections.observableArrayList();
 
     @FXML
@@ -96,11 +104,36 @@ public class PrimaryController {
         lexer.run();
         Vector<Token> tokens = lexer.getTokens();
         entries.clear();
-        for (Token token : tokens){
+
+        int errorCount = 0;
+
+        for (Token token : tokens) {
             entries.add(new TokenEntry(token.getWord(), token.getToken(), token.getLine() + ""));
+
+            if ("ERROR".equals(token.getToken())) {
+                errorCount++;
+            }
         }
 
+        Parser.setTokens(tokens);
+
         output.setItems(entries);
+        treeView.setRoot(Parser.parse());
+
+        terminal.setText("---------------- LEXER ----------------\n " +
+                "Words Found: " + tokens.size() + "\n Errors Found: " + errorCount + "\n Correct Rate: " +
+                (float) (tokens.size() - errorCount) / tokens.size() * 100.0 + "%" +
+                "\n---------------- PARSER ----------------\n " +
+                "Possible Errors: ");
+        ErrorHandler errorHandler = Parser.errorHandler;
+        for (String error : errorHandler.getErrors()) {
+            terminal.appendText(error + "");
+        }
+        terminal.appendText("\n----------- SEMANTIC ANALYZER -----------\n ");
+        errorHandler = SemanticAnalyzer.errorHandler;
+        for (String error : errorHandler.getErrors()) {
+            terminal.appendText(error + "");
+        }
     }
 
 }
