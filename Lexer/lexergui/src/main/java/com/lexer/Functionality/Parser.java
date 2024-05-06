@@ -11,7 +11,7 @@ public class Parser {
     private static int currentToken = 0;
     public static ErrorHandler errorHandler = new ErrorHandler("PARSER");
 
-    private static TreeItem<String> root = new TreeItem<>("PROGRAM");
+    private static TreeItem<String> root = new TreeItem<>("FILE");
     private static TreeItem<String> current_level;
 
     public static void setTokens(Vector<Token> tokens) {
@@ -60,6 +60,18 @@ public class Parser {
                 case 9:
                     errMsg += "(";
                     break;
+                case 10:
+                    errMsg += "while";
+                    break;
+                case 11:
+                    errMsg += "break";
+                    break;
+                case 12:
+                    errMsg += "valid data value";
+                    break;
+                case 13:
+                    errMsg += ":";
+                    break;
                 default:
                     break;
             }
@@ -83,8 +95,11 @@ public class Parser {
     }
 
     private static void RULE_PROGRAM() {
+        TreeItem<String> child = new TreeItem<>("PROGRAM");
+        current_level.getChildren().add(child);
+        current_level = child;
         if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("{")) {
-            root.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
+            current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
             currentToken++;
         } else {
             error(1);
@@ -93,18 +108,19 @@ public class Parser {
         RULE_BODY();
 
         if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("}")) {
-            root.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
+            current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
             currentToken++;
         } else {
             error(2);
         }
+        current_level = child.getParent();
     }
 
     private static void RULE_BODY() {
+        TreeItem<String> child = new TreeItem<>("BODY");
+        current_level.getChildren().add(child);
+        current_level = child;
         while (isCurrentTokenValid() && !tokens.get(currentToken).getWord().equals("}")) {
-            TreeItem<String> child = new TreeItem<>("BODY");
-            current_level.getChildren().add(child);
-            current_level = child;
 
             if (isCurrentTokenValid() && tokens.get(currentToken).getToken().equals("ID")) {
                 RULE_ASSIGNMENT();
@@ -114,7 +130,7 @@ public class Parser {
                 } else
                     error(3);
             } else if (isCurrentTokenValid() &&
-                    (isVarType(tokens.get(currentToken).getToken()) ||
+                    (isVarType(tokens.get(currentToken).getWord()) &&
                             tokens.get(currentToken).getToken().equals("KEYWORD"))) {
                 // } else if (isCurrentTokenValid() &&
                 // isVarType(tokens.get(currentToken).getToken())) {
@@ -126,8 +142,17 @@ public class Parser {
                     error(3);
             } else if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("while")) {
                 RULE_WHILE();
+            } else if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("do")){
+                RULE_DO_WHILE();
+                if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals(";")) {
+                    current_level.getChildren().add(new TreeItem<String>(";"));
+                    currentToken++;
+                } else
+                    error(3);
             } else if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("if")) {
                 RULE_IF();
+            } else if(isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("switch")){
+                RULE_SWITCH_CASE();
             } else if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("return")) {
                 RULE_RETURN();
                 if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals(";")) {
@@ -144,8 +169,9 @@ public class Parser {
                     error(3);
             } else
                 error(6);
-            currentToken++;
+            //currentToken++;
         }
+        current_level = child.getParent();
     }
 
     private static void RULE_ASSIGNMENT() {
@@ -154,6 +180,7 @@ public class Parser {
         current_level = child;
 
         if (isCurrentTokenValid() && tokens.get(currentToken).getToken().equals("ID")) {
+            current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
             currentToken++;
             if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("=")) {
                 current_level.getChildren().add(new TreeItem<String>("="));
@@ -163,6 +190,8 @@ public class Parser {
                 error(7);
             }
         }
+
+        current_level = child.getParent();
     }
 
     private static void RULE_VARIABLE() {
@@ -171,14 +200,22 @@ public class Parser {
         current_level = child;
 
         if (isCurrentTokenValid() &&
-                (isVarType(tokens.get(currentToken).getToken()) ||
+                (isVarType(tokens.get(currentToken).getWord()) &&
                         tokens.get(currentToken).getToken().equals("KEYWORD"))) {
+            current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
             currentToken++;
             if (isCurrentTokenValid() && tokens.get(currentToken).getToken().equals("ID")) {
+                current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
                 currentToken++;
             } else
                 error(8);
+            if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("=")) {
+                current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
+                currentToken++;
+                RULE_EXPRESSION();
+            }
         }
+        current_level = child.getParent();
     }
 
     private static void RULE_WHILE() {
@@ -202,6 +239,36 @@ public class Parser {
             } else
                 error(9);
         }
+        current_level = child.getParent();
+    }
+
+    private static void RULE_DO_WHILE() {
+        TreeItem<String> child = new TreeItem<String>("RULE DO WHILE");
+        current_level.getChildren().add(child);
+        current_level = child;
+        
+        if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("do")) {
+            current_level.getChildren().add(new TreeItem<String>("do"));
+            currentToken++;
+            RULE_PROGRAM();
+            if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("while")){
+                current_level.getChildren().add(new TreeItem<String>("while"));
+                currentToken++;
+                if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("(")) {
+                    current_level.getChildren().add(new TreeItem<String>("("));
+                    currentToken++;
+                    RULE_EXPRESSION();
+                    if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals(")")) {
+                        current_level.getChildren().add(new TreeItem<String>(")"));
+                        currentToken++;
+                    } else
+                        error(4);
+                } else
+                    error(9);
+            } else
+                error(10);
+        }
+        current_level = child.getParent();
     }
 
     private static void RULE_IF() {
@@ -230,6 +297,66 @@ public class Parser {
             } else
                 error(9);
         }
+        current_level = child.getParent();
+    }
+
+    private static void RULE_SWITCH_CASE() {
+        TreeItem<String> child = new TreeItem<>("RULE SWITCH CASE");
+        current_level.getChildren().add(child);
+        current_level = child;
+
+        if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("switch")) {
+            current_level.getChildren().add(new TreeItem<String>("switch"));
+            currentToken++;
+            if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("(")) {
+                current_level.getChildren().add(new TreeItem<String>("("));
+                currentToken++;
+                RULE_EXPRESSION();
+                if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals(")")) {
+                    current_level.getChildren().add(new TreeItem<String>(")"));
+                    currentToken++;
+                    if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("{")){
+                        current_level.getChildren().add(new TreeItem<String>(";"));
+                        currentToken++;
+                        while (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("case")) {
+                            current_level.getChildren().add(new TreeItem<String>("case"));
+                            currentToken++;
+                            if (isCurrentTokenValid() && isDataType(tokens.get(currentToken).getToken())){
+                                current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
+                                currentToken++;
+                                if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals(":")){
+                                    current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
+                                    currentToken++;
+                                    RULE_PROGRAM();
+                                    if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("break")) {
+                                        current_level.getChildren().add(new TreeItem<String>("break"));
+                                        currentToken++;
+                                        if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals(";")) {
+                                            current_level.getChildren().add(new TreeItem<String>(";"));
+                                            currentToken++;
+                                        } else
+                                            error(3);
+                                    } else
+                                        error(11);
+                                } else
+                                    error(13);
+                            } else
+                                error(12);
+                        };
+                        if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("}")) {
+                            current_level.getChildren().add(new TreeItem<String>("}"));
+                            currentToken++;
+                        } else
+                            error(2);
+                    } else
+                        error(1);
+                } else
+                    error(4);
+            } else
+                error(9);
+        }
+
+        current_level = child.getParent();
     }
 
     private static void RULE_RETURN() {
@@ -242,6 +369,7 @@ public class Parser {
             currentToken++;
             RULE_EXPRESSION();
         }
+        current_level = child.getParent();
     }
 
     private static void RULE_PRINT() {
@@ -264,6 +392,7 @@ public class Parser {
             } else
                 error(9);
         }
+        current_level = child.getParent();
     }
 
     private static void RULE_EXPRESSION() {
@@ -377,7 +506,7 @@ public class Parser {
         current_level.getChildren().add(child);
         current_level = child;
 
-        if (isCurrentTokenValid() && isVarType(tokens.get(currentToken).getToken())) {
+        if (isCurrentTokenValid() && isDataType(tokens.get(currentToken).getToken())) {
             current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
             currentToken++;
         } else if (isCurrentTokenValid() && tokens.get(currentToken).getToken().equals("ID")) {
@@ -404,16 +533,22 @@ public class Parser {
 
     }
 
-    private static boolean isVarType(String token) {
-        if (token.equals("INTEGER") ||
-                token.equals("FLOAT") ||
-                token.equals("OCTAL") ||
-                token.equals("BINARY") ||
-                token.equals("HEXADECIMAL") ||
-                token.equals("CHAR") ||
-                token.equals("STRING")) {
+    private static boolean isVarType(String token_word) {
+        if (token_word.equals("int") ||
+                token_word.equals("float") ||
+                token_word.equals("char") ||
+                token_word.equals("string") ||
+                token_word.equals("bool"))
             return true;
-        }
         return false;
     }
+
+    private static boolean isDataType(String token) {
+        if (token.equals("INTEGER") || token.equals("FLOAT") || token.equals("CHAR") ||
+            token.equals("STRING") || token.equals("HEXADECIMAL") || token.equals("OCTAL") ||
+            token.equals("BINARY") || token.equals("BOOLEAN"))
+            return true;
+        return false;
+    }
+
 }
