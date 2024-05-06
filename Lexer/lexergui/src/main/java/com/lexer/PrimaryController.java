@@ -10,6 +10,7 @@ import java.util.Vector;
 import com.lexer.ExtraModules.ErrorHandler;
 import com.lexer.Functionality.Lexer;
 import com.lexer.Functionality.Parser;
+import com.lexer.Functionality.SemanticAnalyzer;
 import com.lexer.Functionality.Token;
 
 import javafx.collections.FXCollections;
@@ -119,12 +120,17 @@ public class PrimaryController {
         output.setItems(entries);
         treeView.setRoot(Parser.parse());
 
-        terminal.setText("----------- LEXER -----------\n " +
+        terminal.setText("---------------- LEXER ----------------\n " +
                 "Words Found: " + tokens.size() + "\n Errors Found: " + errorCount + "\n Correct Rate: " +
                 (float) (tokens.size() - errorCount) / tokens.size() * 100.0 + "%" +
-                "\n----------- PARSER -----------\n " +
+                "\n---------------- PARSER ----------------\n " +
                 "Possible Errors: ");
         ErrorHandler errorHandler = Parser.errorHandler;
+        for (String error : errorHandler.getErrors()) {
+            terminal.appendText(error + "");
+        }
+        terminal.appendText("\n----------- SEMANTIC ANALYZER -----------\n ");
+        errorHandler = SemanticAnalyzer.errorHandler;
         for (String error : errorHandler.getErrors()) {
             terminal.appendText(error + "");
         }
