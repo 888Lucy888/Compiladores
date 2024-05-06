@@ -1,5 +1,7 @@
 package com.lexer.Functionality;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Vector;
 
 import com.lexer.ExtraModules.ErrorHandler;
@@ -98,6 +100,13 @@ public class Parser {
         TreeItem<String> child = new TreeItem<>("PROGRAM");
         current_level.getChildren().add(child);
         current_level = child;
+
+        Set<String> firstSet = new HashSet<>();
+        firstSet.add("{");
+
+        Set<String> followSet = new HashSet<>();
+        followSet.add("EOF");
+
         if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("{")) {
             current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
             currentToken++;
@@ -120,6 +129,13 @@ public class Parser {
         TreeItem<String> child = new TreeItem<>("BODY");
         current_level.getChildren().add(child);
         current_level = child;
+
+        Set<String> firstSet = new HashSet<>();
+        firstSet.add("CALCULATE");
+
+        Set<String> followSet = new HashSet<>();
+        followSet.add("}");
+
         while (isCurrentTokenValid() && !tokens.get(currentToken).getWord().equals("}")) {
 
             if (isCurrentTokenValid() && tokens.get(currentToken).getToken().equals("ID")) {
@@ -179,6 +195,12 @@ public class Parser {
         current_level.getChildren().add(child);
         current_level = child;
 
+        Set<String> firstSet = new HashSet<>();
+        firstSet.add("ID");
+
+        Set<String> followSet = new HashSet<>();
+        followSet.add(";");
+
         if (isCurrentTokenValid() && tokens.get(currentToken).getToken().equals("ID")) {
             current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
             currentToken++;
@@ -199,6 +221,16 @@ public class Parser {
         current_level.getChildren().add(child);
         current_level = child;
 
+        Set<String> firstSet = new HashSet<>();
+        firstSet.add("int");
+        firstSet.add("float");
+        firstSet.add("char");
+        firstSet.add("string");
+        firstSet.add("bool");
+
+        Set<String> followSet = new HashSet<>();
+        followSet.add(";");
+
         if (isCurrentTokenValid() &&
                 (isVarType(tokens.get(currentToken).getWord()) &&
                         tokens.get(currentToken).getToken().equals("KEYWORD"))) {
@@ -206,6 +238,7 @@ public class Parser {
             currentToken++;
             if (isCurrentTokenValid() && tokens.get(currentToken).getToken().equals("ID")) {
                 current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
+                SemanticAnalyzer.CheckVariable(tokens.get(currentToken-1).getWord(),tokens.get(currentToken).getWord());
                 currentToken++;
             } else
                 error(8);
@@ -222,6 +255,12 @@ public class Parser {
         TreeItem<String> child = new TreeItem<>("RULE WHILE");
         current_level.getChildren().add(child);
         current_level = child;
+        
+        Set<String> firstSet = new HashSet<>();
+        firstSet.add("while");
+
+        Set<String> followSet = new HashSet<>();
+        followSet.add("CALCULATE");
 
         if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("while")) {
             current_level.getChildren().add(new TreeItem<String>("while"));
@@ -247,6 +286,12 @@ public class Parser {
         current_level.getChildren().add(child);
         current_level = child;
         
+        Set<String> firstSet = new HashSet<>();
+        firstSet.add("do");
+
+        Set<String> followSet = new HashSet<>();
+        followSet.add(")???");
+
         if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("do")) {
             current_level.getChildren().add(new TreeItem<String>("do"));
             currentToken++;
@@ -275,6 +320,12 @@ public class Parser {
         TreeItem<String> child = new TreeItem<>("RULE IF");
         current_level.getChildren().add(child);
         current_level = child;
+        
+        Set<String> firstSet = new HashSet<>();
+        firstSet.add("if");
+
+        Set<String> followSet = new HashSet<>();
+        followSet.add("}CALCULATE");
 
         if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("if")) {
             currentToken++;
@@ -304,6 +355,12 @@ public class Parser {
         TreeItem<String> child = new TreeItem<>("RULE SWITCH CASE");
         current_level.getChildren().add(child);
         current_level = child;
+
+        Set<String> firstSet = new HashSet<>();
+        firstSet.add("switch");
+
+        Set<String> followSet = new HashSet<>();
+        followSet.add("}CALCULATE");
 
         if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("switch")) {
             current_level.getChildren().add(new TreeItem<String>("switch"));
@@ -364,6 +421,12 @@ public class Parser {
         current_level.getChildren().add(child);
         current_level = child;
 
+        Set<String> firstSet = new HashSet<>();
+        firstSet.add("return");
+
+        Set<String> followSet = new HashSet<>();
+        followSet.add(";");
+
         if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("return")) {
             current_level.getChildren().add(new TreeItem<String>("return"));
             currentToken++;
@@ -376,6 +439,12 @@ public class Parser {
         TreeItem<String> child = new TreeItem<>("RULE PRINT");
         current_level.getChildren().add(child);
         current_level = child;
+
+        Set<String> firstSet = new HashSet<>();
+        firstSet.add("print");
+
+        Set<String> followSet = new HashSet<>();
+        followSet.add(";");
 
         if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("print")) {
             current_level.getChildren().add(new TreeItem<String>("print"));
@@ -400,6 +469,13 @@ public class Parser {
         current_level.getChildren().add(child);
         current_level = child;
 
+        Set<String> firstSet = new HashSet<>();
+        firstSet.add("FIRST(X)");
+
+        Set<String> followSet = new HashSet<>();
+        followSet.add(")");
+        followSet.add(";");
+
         RULE_X();
         while (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("|")) {
             current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
@@ -414,6 +490,12 @@ public class Parser {
         current_level.getChildren().add(child);
         current_level = child;
 
+        Set<String> firstSet = new HashSet<>();
+        firstSet.add("FIRST(Y)");
+
+        Set<String> followSet = new HashSet<>();
+        followSet.add("CALCULATE");
+
         RULE_Y();
         while (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("&")) {
             current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
@@ -427,6 +509,12 @@ public class Parser {
         TreeItem<String> child = new TreeItem<>("RULE Y");
         current_level.getChildren().add(child);
         current_level = child;
+        
+        Set<String> firstSet = new HashSet<>();
+        firstSet.add("! U FIRST(R)");
+
+        Set<String> followSet = new HashSet<>();
+        followSet.add("CALCULATE");
 
         if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("!")) {
             current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
@@ -442,6 +530,12 @@ public class Parser {
         current_level.getChildren().add(child);
         current_level = child;
         RULE_E();
+
+        Set<String> firstSet = new HashSet<>();
+        firstSet.add("FIRST(E)");
+
+        Set<String> followSet = new HashSet<>();
+        followSet.add("FOLLOW(Y)");
 
         while (isCurrentTokenValid() && (tokens.get(currentToken).getWord().equals("<")
                 || tokens.get(currentToken).getWord().equals(">")
@@ -462,6 +556,12 @@ public class Parser {
         current_level = child;
         RULE_A();
 
+        Set<String> firstSet = new HashSet<>();
+        firstSet.add("FIRST(A)");
+
+        Set<String> followSet = new HashSet<>();
+        followSet.add("CALCULATE");
+
         while (isCurrentTokenValid() && (tokens.get(currentToken).getWord().equals("-")
                 || tokens.get(currentToken).getWord().equals("+"))) {
             current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
@@ -477,6 +577,12 @@ public class Parser {
         current_level = child;
         RULE_B();
 
+        Set<String> firstSet = new HashSet<>();
+        firstSet.add("FIRST(B)");
+
+        Set<String> followSet = new HashSet<>();
+        followSet.add("CALCULATE");
+
         while (isCurrentTokenValid() && (tokens.get(currentToken).getWord().equals("/")
                 || tokens.get(currentToken).getWord().equals("*"))) {
             current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
@@ -490,6 +596,12 @@ public class Parser {
         TreeItem<String> child = new TreeItem<>("RULE B");
         current_level.getChildren().add(child);
         current_level = child;
+
+        Set<String> firstSet = new HashSet<>();
+        firstSet.add("CALCULATE");
+
+        Set<String> followSet = new HashSet<>();
+        followSet.add("CALCULATE");
 
         if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("-")) {
             current_level.getChildren().add(new TreeItem<String>("-"));
@@ -505,6 +617,21 @@ public class Parser {
         TreeItem<String> child = new TreeItem<>("RULE C");
         current_level.getChildren().add(child);
         current_level = child;
+        
+        Set<String> firstSet = new HashSet<>();
+        firstSet.add("INTEGER");
+        firstSet.add("OCTAL");
+        firstSet.add("HEXADECIMAL");
+        firstSet.add("BINARY");
+        firstSet.add("TRUE");
+        firstSet.add("FALSE");
+        firstSet.add("STRING");
+        firstSet.add("CHAR");
+        firstSet.add("FLOAT");
+        firstSet.add("ID");
+
+        Set<String> followSet = new HashSet<>();
+        followSet.add("FOLLOW(B)");
 
         if (isCurrentTokenValid() && isDataType(tokens.get(currentToken).getToken())) {
             current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
