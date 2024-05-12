@@ -238,7 +238,7 @@ public class Parser {
             currentToken++;
             if (isCurrentTokenValid() && tokens.get(currentToken).getToken().equals("ID")) {
                 current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
-                SemanticAnalyzer.CheckVariable(tokens.get(currentToken-1).getWord(),tokens.get(currentToken).getWord());
+                SemanticAnalyzer.AddVariable(tokens.get(currentToken-1).getWord(),tokens.get(currentToken).getWord());
                 currentToken++;
             } else
                 error(8);
