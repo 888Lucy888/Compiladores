@@ -350,6 +350,7 @@ public class Parser {
         }
         current_level = child.getParent();
     }
+    
 
     private static void RULE_SWITCH_CASE() {
         TreeItem<String> child = new TreeItem<>("RULE SWITCH CASE");
