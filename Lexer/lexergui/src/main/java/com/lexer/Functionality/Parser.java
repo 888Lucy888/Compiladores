@@ -598,7 +598,8 @@ public class Parser {
                         break;
                     }
                 }
-                currentToken++;
+                if (error)
+                    currentToken++;
             }
         } else {
             error = true;
@@ -667,7 +668,8 @@ public class Parser {
                         break;
                     }
                 }
-                currentToken++;
+                if (error)
+                    currentToken++;
             }
         } else {
             error = true;
@@ -737,7 +739,8 @@ public class Parser {
                         break;
                     }
                 }
-                currentToken++;
+                if (error)
+                    currentToken++;
             }
         } else {
             error = true;
@@ -813,7 +816,8 @@ public class Parser {
                         break;
                     }
                 }
-                currentToken++;
+                if (error)
+                    currentToken++;
             }
         } else {
             error = true;
@@ -888,7 +892,8 @@ public class Parser {
                         break;
                     }
                 }
-                currentToken++;
+                if (error)
+                    currentToken++;
             }
         } else {
             error = true;
@@ -966,7 +971,8 @@ public class Parser {
                         break;
                     }
                 }
-                currentToken++;
+                if (error)
+                    currentToken++;
             }
         } else {
             error = true;
@@ -1039,7 +1045,8 @@ public class Parser {
                         break;
                     }
                 }
-                currentToken++;
+                if (error)
+                    currentToken++;
             }
         } else {
             error = true;
@@ -1117,7 +1124,8 @@ public class Parser {
                         break;
                     }
                 }
-                currentToken++;
+                if (error)
+                    currentToken++;
             }
         } else {
             currentToken++;
