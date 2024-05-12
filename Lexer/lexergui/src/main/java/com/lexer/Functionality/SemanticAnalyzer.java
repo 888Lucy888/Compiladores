@@ -10,13 +10,13 @@ import com.lexer.ExtraModules.SymbolTableItem;
 
 public class SemanticAnalyzer {
     private static Hashtable<String, Vector<SymbolTableItem>> symbolTable = new Hashtable<>();
-    
+
     public static Hashtable<String, Vector<SymbolTableItem>> getSymbolTable() {
         return symbolTable;
     }
 
     public static ErrorHandler errorHandler = new ErrorHandler("SEMANTIC ANALYZER");
-    private static final Stack stack = new Stack<>();
+    private static final Stack<Token> stack = new Stack<Token>();
 
     // Possible operations
     public static final int OP_Plus = 0;
@@ -181,7 +181,7 @@ public class SemanticAnalyzer {
 
     public static void AddVariable(String scope, String type, String id, String value) {
         // Variable exists in same scope
-        if (CheckVariable(scope, type, value, id)) {
+        if (CheckVariable(scope, id)) {
             errorHandler.storeError("Error: Variable '" + id + "' is already defined.");
             return;
         }
@@ -203,7 +203,7 @@ public class SemanticAnalyzer {
         AddVariable("global", type, id, "");
     }
 
-    public static boolean CheckVariable(String scope, String type, String value, String id){
+    public static boolean CheckVariable(String scope, String id){
         Vector<SymbolTableItem> items = symbolTable.get(id);
         if (items == null) {
             return false;
@@ -217,12 +217,20 @@ public class SemanticAnalyzer {
         }
     }
 
-    public static boolean CheckVariable(String scope, String type, String id){
-        return CheckVariable(scope, type, "", id);
+    public static boolean CheckVariable(String id){
+        Vector<SymbolTableItem> items = symbolTable.get(id);
+        if (items == null) {
+            return false;
+        }
+        return true;
     }
 
-    public static boolean CheckVariable(String type, String id){
-        return CheckVariable("global", type, "", id);
+    public static Stack<Token> getStack() {
+        return stack;
+    }
+
+    public static void clearVariables(){
+        symbolTable.clear();
     }
 
 }

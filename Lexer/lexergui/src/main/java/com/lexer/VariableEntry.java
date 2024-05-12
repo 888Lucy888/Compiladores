@@ -6,13 +6,13 @@ public class VariableEntry {
     private final SimpleStringProperty idValue;
     private final SimpleStringProperty scopeValue;
     private final SimpleStringProperty typeValue;
-    private final SimpleStringProperty valueValue;
+    private final SimpleStringProperty dataValue;
 
-    public VariableEntry(String idValue, String scopeValue, String typeValue, String valueValue) {
+    public VariableEntry(String idValue, String scopeValue, String typeValue, String dataValue) {
         this.idValue = new SimpleStringProperty(idValue);
         this.scopeValue = new SimpleStringProperty(scopeValue);
         this.typeValue = new SimpleStringProperty(typeValue);
-        this.valueValue = new SimpleStringProperty(valueValue);
+        this.dataValue = new SimpleStringProperty(dataValue);
     }
 
     public String getIdValue() {
@@ -27,7 +27,7 @@ public class VariableEntry {
         return typeValue.get();
     }
 
-    public String getValueValue() {
-        return valueValue.get();
+    public String getDataValue() {
+        return dataValue.get();
     }
 }

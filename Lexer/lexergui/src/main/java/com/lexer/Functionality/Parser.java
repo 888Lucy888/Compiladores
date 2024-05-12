@@ -74,6 +74,9 @@ public class Parser {
                 case 13:
                     errMsg += ":";
                     break;
+                case 14:
+                    errMsg += "function parameter error";
+                    break;
                 default:
                     break;
             }
@@ -90,13 +93,14 @@ public class Parser {
         currentToken = 0;
 
         clearTree(root);
+        SemanticAnalyzer.clearVariables();
         current_level = root;
-        RULE_PROGRAM();
+        RULE_PROGRAM("global");
 
         return root;
     }
 
-    private static void RULE_PROGRAM() {
+    private static void RULE_PROGRAM(String scope) {
         TreeItem<String> child = new TreeItem<>("PROGRAM");
         current_level.getChildren().add(child);
         current_level = child;
@@ -114,7 +118,7 @@ public class Parser {
             error(1);
         }
 
-        RULE_BODY();
+        RULE_BODY(scope);
 
         if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("}")) {
             current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
@@ -125,7 +129,7 @@ public class Parser {
         current_level = child.getParent();
     }
 
-    private static void RULE_BODY() {
+    private static void RULE_BODY(String scope) {
         TreeItem<String> child = new TreeItem<>("BODY");
         current_level.getChildren().add(child);
         current_level = child;
@@ -139,7 +143,7 @@ public class Parser {
         while (isCurrentTokenValid() && !tokens.get(currentToken).getWord().equals("}")) {
 
             if (isCurrentTokenValid() && tokens.get(currentToken).getToken().equals("ID")) {
-                RULE_ASSIGNMENT();
+                RULE_ASSIGNMENT(scope);
                 if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals(";")) {
                     current_level.getChildren().add(new TreeItem<String>(";"));
                     currentToken++;
@@ -150,34 +154,34 @@ public class Parser {
                             tokens.get(currentToken).getToken().equals("KEYWORD"))) {
                 // } else if (isCurrentTokenValid() &&
                 // isVarType(tokens.get(currentToken).getToken())) {
-                RULE_VARIABLE();
+                RULE_VARIABLE(scope);
                 if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals(";")) {
                     current_level.getChildren().add(new TreeItem<String>(";"));
                     currentToken++;
                 } else
                     error(3);
             } else if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("while")) {
-                RULE_WHILE();
+                RULE_WHILE(scope);
             } else if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("do")){
-                RULE_DO_WHILE();
+                RULE_DO_WHILE(scope);
                 if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals(";")) {
                     current_level.getChildren().add(new TreeItem<String>(";"));
                     currentToken++;
                 } else
                     error(3);
             } else if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("if")) {
-                RULE_IF();
+                RULE_IF(scope);
             } else if(isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("switch")){
-                RULE_SWITCH_CASE();
+                RULE_SWITCH_CASE(scope);
             } else if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("return")) {
-                RULE_RETURN();
+                RULE_RETURN(scope);
                 if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals(";")) {
                     current_level.getChildren().add(new TreeItem<String>(";"));
                     currentToken++;
                 } else
                     error(3);
             } else if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("print")) {
-                RULE_PRINT();
+                RULE_PRINT(scope);
                 if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals(";")) {
                     current_level.getChildren().add(new TreeItem<String>(";"));
                     currentToken++;
@@ -190,7 +194,7 @@ public class Parser {
         current_level = child.getParent();
     }
 
-    private static void RULE_ASSIGNMENT() {
+    private static void RULE_ASSIGNMENT(String scope) {
         TreeItem<String> child = new TreeItem<>("RULE ASSIGNMENT");
         current_level.getChildren().add(child);
         current_level = child;
@@ -202,12 +206,15 @@ public class Parser {
         followSet.add(";");
 
         if (isCurrentTokenValid() && tokens.get(currentToken).getToken().equals("ID")) {
+            if (!SemanticAnalyzer.CheckVariable(tokens.get(currentToken).getWord())){
+                SemanticAnalyzer.errorHandler.storeError("Variable " + tokens.get(currentToken).getWord() + " is not defined");
+            }
             current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
             currentToken++;
             if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("=")) {
                 current_level.getChildren().add(new TreeItem<String>("="));
                 currentToken++;
-                RULE_EXPRESSION();
+                RULE_EXPRESSION(scope);
             } else {
                 error(7);
             }
@@ -216,7 +223,7 @@ public class Parser {
         current_level = child.getParent();
     }
 
-    private static void RULE_VARIABLE() {
+    private static void RULE_VARIABLE(String scope) {
         TreeItem<String> child = new TreeItem<>("RULE VARIABLE");
         current_level.getChildren().add(child);
         current_level = child;
@@ -238,20 +245,93 @@ public class Parser {
             currentToken++;
             if (isCurrentTokenValid() && tokens.get(currentToken).getToken().equals("ID")) {
                 current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
-                SemanticAnalyzer.AddVariable(tokens.get(currentToken-1).getWord(),tokens.get(currentToken).getWord());
                 currentToken++;
             } else
                 error(8);
-            if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("=")) {
-                current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
-                currentToken++;
-                RULE_EXPRESSION();
+            // Rule for a function
+            if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("(")) {
+                RULE_FUNCTION();
+            }
+            // Then it is a variable
+            else {
+                SemanticAnalyzer.AddVariable(scope, tokens.get(currentToken-2).getWord(), tokens.get(currentToken-1).getWord());
+                if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("=")) {
+                    current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
+                    currentToken++;
+                    RULE_EXPRESSION(scope);
+                }
             }
         }
         current_level = child.getParent();
     }
 
-    private static void RULE_WHILE() {
+    private static void RULE_FUNCTION() {
+        String type = tokens.get(currentToken - 2).getWord();
+        TreeItem<String> child = new TreeItem<>("RULE FUNCTION");
+        current_level.getChildren().add(child);
+        current_level = child;
+        current_level.getChildren().add(new TreeItem<String>("("));
+        Set<String> firstSet = new HashSet<>();
+        firstSet.add("int");
+        Set<String> followSet = new HashSet<>();
+        followSet.add("}");
+        String signature = tokens.get(currentToken - 1).getWord();
+        currentToken++;
+        signature = RULE_PARAM_1(signature);
+        SemanticAnalyzer.AddVariable("function", type, signature);
+        RULE_PROGRAM(signature);
+        current_level = child.getParent();
+    }
+
+    private static String RULE_PARAM_1(String signature){
+        TreeItem<String> child = new TreeItem<>("RULE PARAM 1");
+        current_level.getChildren().add(child);
+        current_level = child;
+        Set<String> firstSet = new HashSet<>();
+        firstSet.add("int");
+        firstSet.add("float");
+        firstSet.add("char");
+        firstSet.add("string");
+        firstSet.add("bool");
+        Set<String> followSet = new HashSet<>();
+        followSet.add(")");
+        boolean error = false;
+        while (isCurrentTokenValid() && (isVarType(tokens.get(currentToken).getWord()) && tokens.get(currentToken).getToken().equals("KEYWORD"))) {
+            signature += "_" + tokens.get(currentToken).getWord();
+            current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
+            currentToken++;
+            if (isCurrentTokenValid() && tokens.get(currentToken).getToken().equals("ID")) {
+                current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
+                currentToken++;
+                if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals(",")){
+                    current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
+                    currentToken++;
+                }
+            } else {
+                error = true;
+                break;
+            }
+        }
+        if (isCurrentTokenValid() && !tokens.get(currentToken).getWord().equals(")"))
+            error = true;
+        if (error) {
+            error(14);
+            while(error) {
+                for (String value: followSet) {
+                    if (tokens.get(currentToken).getWord().equals(value))
+                        error = false;
+                }
+                currentToken++;
+            }
+        }
+        if (tokens.get(currentToken).getWord().equals(")")) currentToken++;
+        else error(4);
+        current_level.getChildren().add(new TreeItem<>(")"));
+        current_level = child.getParent();
+        return signature;
+    }
+
+    private static void RULE_WHILE(String scope) {
         TreeItem<String> child = new TreeItem<>("RULE WHILE");
         current_level.getChildren().add(child);
         current_level = child;
@@ -268,11 +348,11 @@ public class Parser {
             if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("(")) {
                 current_level.getChildren().add(new TreeItem<String>("("));
                 currentToken++;
-                RULE_EXPRESSION();
+                RULE_EXPRESSION(scope);
                 if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals(")")) {
                     current_level.getChildren().add(new TreeItem<String>(")"));
                     currentToken++;
-                    RULE_PROGRAM();
+                    RULE_PROGRAM(scope);
                 } else
                     error(4);
             } else
@@ -281,7 +361,7 @@ public class Parser {
         current_level = child.getParent();
     }
 
-    private static void RULE_DO_WHILE() {
+    private static void RULE_DO_WHILE(String scope) {
         TreeItem<String> child = new TreeItem<String>("RULE DO WHILE");
         current_level.getChildren().add(child);
         current_level = child;
@@ -295,14 +375,14 @@ public class Parser {
         if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("do")) {
             current_level.getChildren().add(new TreeItem<String>("do"));
             currentToken++;
-            RULE_PROGRAM();
+            RULE_PROGRAM(scope);
             if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("while")){
                 current_level.getChildren().add(new TreeItem<String>("while"));
                 currentToken++;
                 if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("(")) {
                     current_level.getChildren().add(new TreeItem<String>("("));
                     currentToken++;
-                    RULE_EXPRESSION();
+                    RULE_EXPRESSION(scope);
                     if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals(")")) {
                         current_level.getChildren().add(new TreeItem<String>(")"));
                         currentToken++;
@@ -316,7 +396,7 @@ public class Parser {
         current_level = child.getParent();
     }
 
-    private static void RULE_IF() {
+    private static void RULE_IF(String scope) {
         TreeItem<String> child = new TreeItem<>("RULE IF");
         current_level.getChildren().add(child);
         current_level = child;
@@ -333,15 +413,15 @@ public class Parser {
             if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("(")) {
                 current_level.getChildren().add(new TreeItem<String>("("));
                 currentToken++;
-                RULE_EXPRESSION();
+                RULE_EXPRESSION(scope);
                 if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals(")")) {
                     current_level.getChildren().add(new TreeItem<String>(")"));
                     currentToken++;
-                    RULE_PROGRAM();
+                    RULE_PROGRAM(scope);
                     if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("else")) {
                         current_level.getChildren().add(new TreeItem<String>("else"));
                         currentToken++;
-                        RULE_PROGRAM();
+                        RULE_PROGRAM(scope);
                     }
                 } else
                     error(4);
@@ -352,7 +432,7 @@ public class Parser {
     }
     
 
-    private static void RULE_SWITCH_CASE() {
+    private static void RULE_SWITCH_CASE(String scope) {
         TreeItem<String> child = new TreeItem<>("RULE SWITCH CASE");
         current_level.getChildren().add(child);
         current_level = child;
@@ -369,7 +449,7 @@ public class Parser {
             if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("(")) {
                 current_level.getChildren().add(new TreeItem<String>("("));
                 currentToken++;
-                RULE_EXPRESSION();
+                RULE_EXPRESSION(scope);
                 if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals(")")) {
                     current_level.getChildren().add(new TreeItem<String>(")"));
                     currentToken++;
@@ -385,7 +465,7 @@ public class Parser {
                                 if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals(":")){
                                     current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
                                     currentToken++;
-                                    RULE_PROGRAM();
+                                    RULE_PROGRAM(scope);
                                     if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("break")) {
                                         current_level.getChildren().add(new TreeItem<String>("break"));
                                         currentToken++;
@@ -417,7 +497,7 @@ public class Parser {
         current_level = child.getParent();
     }
 
-    private static void RULE_RETURN() {
+    private static void RULE_RETURN(String scope) {
         TreeItem<String> child = new TreeItem<>("RULE RETURN");
         current_level.getChildren().add(child);
         current_level = child;
@@ -431,12 +511,12 @@ public class Parser {
         if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("return")) {
             current_level.getChildren().add(new TreeItem<String>("return"));
             currentToken++;
-            RULE_EXPRESSION();
+            RULE_EXPRESSION(scope);
         }
         current_level = child.getParent();
     }
 
-    private static void RULE_PRINT() {
+    private static void RULE_PRINT(String scope) {
         TreeItem<String> child = new TreeItem<>("RULE PRINT");
         current_level.getChildren().add(child);
         current_level = child;
@@ -453,7 +533,7 @@ public class Parser {
             if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("(")) {
                 current_level.getChildren().add(new TreeItem<String>("("));
                 currentToken++;
-                RULE_EXPRESSION();
+                RULE_EXPRESSION(scope);
                 if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals(")")) {
                     current_level.getChildren().add(new TreeItem<String>(")"));
                     currentToken++;
@@ -465,7 +545,7 @@ public class Parser {
         current_level = child.getParent();
     }
 
-    private static void RULE_EXPRESSION() {
+    private static void RULE_EXPRESSION(String scope) {
         TreeItem<String> child = new TreeItem<>("EXPRESSION");
         current_level.getChildren().add(child);
         current_level = child;
@@ -477,16 +557,16 @@ public class Parser {
         followSet.add(")");
         followSet.add(";");
 
-        RULE_X();
+        RULE_X(scope);
         while (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("|")) {
             current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
             currentToken++;
-            RULE_X();
+            RULE_X(scope);
         }
         current_level = child.getParent();
     }
 
-    private static void RULE_X() {
+    private static void RULE_X(String scope) {
         TreeItem<String> child = new TreeItem<>("RULE X");
         current_level.getChildren().add(child);
         current_level = child;
@@ -497,16 +577,16 @@ public class Parser {
         Set<String> followSet = new HashSet<>();
         followSet.add("CALCULATE");
 
-        RULE_Y();
+        RULE_Y(scope);
         while (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("&")) {
             current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
             currentToken++;
-            RULE_Y();
+            RULE_Y(scope);
         }
         current_level = child.getParent();
     }
 
-    private static void RULE_Y() {
+    private static void RULE_Y(String scope) {
         TreeItem<String> child = new TreeItem<>("RULE Y");
         current_level.getChildren().add(child);
         current_level = child;
@@ -522,15 +602,15 @@ public class Parser {
             currentToken++;
         }
 
-        RULE_R();
+        RULE_R(scope);
         current_level = child.getParent();
     }
 
-    private static void RULE_R() {
+    private static void RULE_R(String scope) {
         TreeItem<String> child = new TreeItem<>("RULE R");
         current_level.getChildren().add(child);
         current_level = child;
-        RULE_E();
+        RULE_E(scope);
 
         Set<String> firstSet = new HashSet<>();
         firstSet.add("FIRST(E)");
@@ -546,16 +626,16 @@ public class Parser {
                 || tokens.get(currentToken).getWord().equals("!="))) {
             current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
             currentToken++;
-            RULE_E();
+            RULE_E(scope);
         }
         current_level = child.getParent();
     }
 
-    private static void RULE_E() {
+    private static void RULE_E(String scope) {
         TreeItem<String> child = new TreeItem<>("RULE E");
         current_level.getChildren().add(child);
         current_level = child;
-        RULE_A();
+        RULE_A(scope);
 
         Set<String> firstSet = new HashSet<>();
         firstSet.add("FIRST(A)");
@@ -567,16 +647,16 @@ public class Parser {
                 || tokens.get(currentToken).getWord().equals("+"))) {
             current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
             currentToken++;
-            RULE_A();
+            RULE_A(scope);
         }
         current_level = child.getParent();
     }
 
-    private static void RULE_A() {
+    private static void RULE_A(String scope) {
         TreeItem<String> child = new TreeItem<>("RULE A");
         current_level.getChildren().add(child);
         current_level = child;
-        RULE_B();
+        RULE_B(scope);
 
         Set<String> firstSet = new HashSet<>();
         firstSet.add("FIRST(B)");
@@ -588,12 +668,12 @@ public class Parser {
                 || tokens.get(currentToken).getWord().equals("*"))) {
             current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
             currentToken++;
-            RULE_B();
+            RULE_B(scope);
         }
         current_level = child.getParent();
     }
 
-    private static void RULE_B() {
+    private static void RULE_B(String scope) {
         TreeItem<String> child = new TreeItem<>("RULE B");
         current_level.getChildren().add(child);
         current_level = child;
@@ -609,12 +689,12 @@ public class Parser {
             currentToken++;
         }
 
-        RULE_C();
+        RULE_C(scope);
 
         current_level = child.getParent();
     }
 
-    private static void RULE_C() {
+    private static void RULE_C(String scope) {
         TreeItem<String> child = new TreeItem<>("RULE C");
         current_level.getChildren().add(child);
         current_level = child;
@@ -646,7 +726,7 @@ public class Parser {
         } else if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("(")) {
             current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
             currentToken++;
-            RULE_EXPRESSION();
+            RULE_EXPRESSION(scope);
             if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals(")")) {
                 current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
                 currentToken++;
@@ -665,6 +745,7 @@ public class Parser {
         if (token_word.equals("int") ||
                 token_word.equals("float") ||
                 token_word.equals("char") ||
+                token_word.equals("void") ||
                 token_word.equals("string") ||
                 token_word.equals("bool"))
             return true;
