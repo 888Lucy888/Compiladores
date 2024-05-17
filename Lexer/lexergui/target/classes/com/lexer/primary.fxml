@@ -51,6 +51,34 @@
                             <TreeView fx:id="treeView"/>
                         </content>
                     </Tab>
+                    <Tab text="Variable Table">
+                        <content>
+                            <TableView fx:id="variables">
+                                <columns>
+                                    <TableColumn text="ID" prefWidth="150">
+                                        <cellValueFactory>
+                                            <PropertyValueFactory property="idValue" />
+                                        </cellValueFactory>
+                                    </TableColumn>
+                                    <TableColumn text="Scope" prefWidth="150">
+                                        <cellValueFactory>
+                                            <PropertyValueFactory property="scopeValue" />
+                                        </cellValueFactory>
+                                    </TableColumn>
+                                    <TableColumn text="Type" prefWidth="150">
+                                        <cellValueFactory>
+                                            <PropertyValueFactory property="typeValue" />
+                                        </cellValueFactory>
+                                    </TableColumn>
+                                    <TableColumn text="Value" prefWidth="150">
+                                        <cellValueFactory>
+                                            <PropertyValueFactory property="dataValue" />
+                                        </cellValueFactory>
+                                    </TableColumn>
+                                </columns>
+                            </TableView>
+                        </content>
+                    </Tab>
                 </TabPane>
             </children>
         </HBox>
