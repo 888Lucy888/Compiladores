@@ -142,6 +142,11 @@ public class Parser {
 
         while (isCurrentTokenValid() && !tokens.get(currentToken).getWord().equals("}")) {
 
+            if (tokens.get(currentToken).getWord().equals(";")) {
+                currentToken++;
+                continue;
+            }
+
             if (isCurrentTokenValid() && tokens.get(currentToken).getToken().equals("ID")) {
                 RULE_ASSIGNMENT(scope);
                 if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals(";")) {
@@ -207,7 +212,7 @@ public class Parser {
 
         if (isCurrentTokenValid() && tokens.get(currentToken).getToken().equals("ID")) {
             if (!SemanticAnalyzer.CheckVariable(tokens.get(currentToken).getWord())){
-                SemanticAnalyzer.errorHandler.storeError("Variable " + tokens.get(currentToken).getWord() + " is not defined");
+                SemanticAnalyzer.errorHandler.storeError("\nLine " + (tokens.get(currentToken).getLine() - 1) + ": Variable " + tokens.get(currentToken).getWord() + " is not defined");
             }
             current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
             currentToken++;
@@ -233,10 +238,11 @@ public class Parser {
         firstSet.add("float");
         firstSet.add("char");
         firstSet.add("string");
-        firstSet.add("bool");
+        firstSet.add("boolean");
 
         Set<String> followSet = new HashSet<>();
         followSet.add(";");
+        boolean error = false;
 
         if (isCurrentTokenValid() &&
                 (isVarType(tokens.get(currentToken).getWord()) &&
@@ -250,7 +256,11 @@ public class Parser {
                 error(8);
             // Rule for a function
             if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("(")) {
-                RULE_FUNCTION();
+                if (scope.equals("global")) RULE_FUNCTION();
+                else {
+                    error = true;
+                    errorHandler.storeError("\nLine " + (tokens.get(currentToken).getLine() - 1) + ": Function can only be defined in global scope");
+                }
             }
             // Then it is a variable
             else {
@@ -261,6 +271,15 @@ public class Parser {
                     RULE_EXPRESSION(scope);
                 }
             }
+        }
+        while (error) {
+            for (String item : followSet) {
+                if (tokens.get(currentToken).getWord().equals(item)) {
+                    error = false;
+                    break;
+                }
+            }
+            if (error) currentToken++;
         }
         current_level = child.getParent();
     }
@@ -276,10 +295,31 @@ public class Parser {
         Set<String> followSet = new HashSet<>();
         followSet.add("}");
         String signature = tokens.get(currentToken - 1).getWord();
+        SemanticAnalyzer.addFunction(signature);
         currentToken++;
         signature = RULE_PARAM_1(signature);
         SemanticAnalyzer.AddVariable("function", type, signature);
         RULE_PROGRAM(signature);
+        current_level = child.getParent();
+    }
+
+    private static void RULE_FUNCTION_CALL() {
+        TreeItem<String> child = new TreeItem<>("RULE FUNCTION");
+        current_level.getChildren().add(child);
+        current_level = child;
+        current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken - 1).getWord()));
+        current_level.getChildren().add(new TreeItem<String>("("));
+        Set<String> firstSet = new HashSet<>();
+        firstSet.add("(");
+        Set<String> followSet = new HashSet<>();
+        followSet.add(")");
+        followSet.add(";");
+        currentToken++;
+        String signature = RULE_PARAM_2();
+        if (!SemanticAnalyzer.CheckVariable(signature)) {
+            System.out.println("No such function");
+        }
+        //currentToken++;
         current_level = child.getParent();
     }
 
@@ -292,7 +332,7 @@ public class Parser {
         firstSet.add("float");
         firstSet.add("char");
         firstSet.add("string");
-        firstSet.add("bool");
+        firstSet.add("boolean");
         Set<String> followSet = new HashSet<>();
         followSet.add(")");
         boolean error = false;
@@ -327,6 +367,53 @@ public class Parser {
         if (tokens.get(currentToken).getWord().equals(")")) currentToken++;
         else error(4);
         current_level.getChildren().add(new TreeItem<>(")"));
+        current_level = child.getParent();
+        return signature;
+    }
+
+    private static String RULE_PARAM_2() {
+        TreeItem<String> child = new TreeItem<>("RULE PARAM 2");
+        current_level.getChildren().add(child);
+        current_level = child;
+        Set<String> firstSet = new HashSet<>();
+        firstSet.add("ID");
+        firstSet.add("INTEGER");
+        firstSet.add("FLOAT");
+        firstSet.add("CHAR");
+        firstSet.add("STRING");
+        firstSet.add("BOOLEAN");
+        Set<String> followSet = new HashSet<>();
+        followSet.add(")");
+        boolean error = false;
+        String signature = tokens.get(currentToken - 2).getWord();
+        while(isCurrentTokenValid() && !tokens.get(currentToken).getWord().equals(")") && !error) {
+            for (String item : firstSet) {
+                if (tokens.get(currentToken).getToken().equals(item)) {
+                    current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
+                    signature += tokens.get(currentToken).getWord();
+                    currentToken++;
+                    if (tokens.get(currentToken).getWord().equals(",")) {
+                        current_level.getChildren().add(new TreeItem<String>(","));
+                    } else if (tokens.get(currentToken).getWord().equals(")")) break;
+                    else {
+                        error = true;
+                        break;
+                    }
+                } else {
+                    error = true;
+                    break;
+                }
+            }
+        }
+        while (error) {
+            for (String item : followSet) {
+                if (tokens.get(currentToken).getWord().equals(item)) {
+                    error = false;
+                }
+            }
+            if (error) currentToken++;
+        }
+        //currentToken++;
         current_level = child.getParent();
         return signature;
     }
@@ -1059,14 +1146,6 @@ public class Parser {
         }
         if (error) error(3);
 
-        // if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("-")) {
-        //     current_level.getChildren().add(new TreeItem<String>("-"));
-        //     currentToken++;
-        // }
-
-
-        
-
         current_level = child.getParent();
     }
 
@@ -1128,6 +1207,18 @@ public class Parser {
                     currentToken++;
             }
         } else {
+            if (tokens.get(currentToken).getToken().equals("ID")) {
+                // Id is a function
+                if (tokens.get(currentToken + 1).getWord().equals("(")) {
+                    if (!SemanticAnalyzer.CheckFunction(tokens.get(currentToken).getWord()))
+                        errorHandler.storeError("\nLine " + (tokens.get(currentToken).getLine() - 1) + ": Function " + tokens.get(currentToken).getWord() + " does not exist");
+                    currentToken++;
+                    RULE_FUNCTION_CALL();
+                }
+                // ID is a variable
+                else if(!SemanticAnalyzer.CheckVariable(tokens.get(currentToken).getWord()))
+                    errorHandler.storeError("\nLine " + (tokens.get(currentToken).getLine() - 1) + ": Variable " + tokens.get(currentToken).getWord() + " does not exist");
+            }
             currentToken++;
             error = true;
             for (String word : followSet) {
@@ -1138,30 +1229,6 @@ public class Parser {
             }
         }
         if (error) error(3);
-        
-
-        // if (isCurrentTokenValid() && isDataType(tokens.get(currentToken).getToken())) {
-        //     current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
-        //     currentToken++;
-        // } else if (isCurrentTokenValid() && tokens.get(currentToken).getToken().equals("ID")) {
-        //     current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
-        //     currentToken++;
-        // } else if (isCurrentTokenValid() && tokens.get(currentToken).getToken().equals("KEYWORD")) {
-        //     current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
-        //     currentToken++;
-        // } else if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("(")) {
-        //     current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
-        //     currentToken++;
-        //     RULE_EXPRESSION(scope);
-        //     if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals(")")) {
-        //         current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
-        //         currentToken++;
-        //     } else
-        //         error(4);
-        // } else {
-        //     error(5);
-        //     currentToken++;
-        // }
 
         current_level = child.getParent();
 
@@ -1173,7 +1240,7 @@ public class Parser {
                 token_word.equals("char") ||
                 token_word.equals("void") ||
                 token_word.equals("string") ||
-                token_word.equals("bool"))
+                token_word.equals("boolean"))
             return true;
         return false;
     }
@@ -1184,6 +1251,21 @@ public class Parser {
             token.equals("BINARY") || token.equals("BOOLEAN"))
             return true;
         return false;
+    }
+
+    // This functions converts toke classification into programmer typing notation
+    // Eg. INTEGER returns int
+    // Use for function calls and such
+    private static String getProgDataType(Token token) {
+        switch(token.getToken()) {
+            case "ID": return SemanticAnalyzer.getVariableType(token.getWord());
+            case "INTEGER": return "int";
+            case "FLOAT": return "float";
+            case "BOOLEAN": return "boolean";
+            case "CHAR": return "char";
+            case "STRING": return "string";
+        }
+        return "";
     }
 
 }

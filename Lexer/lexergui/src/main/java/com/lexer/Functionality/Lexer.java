@@ -256,8 +256,10 @@ public class Lexer {
 
         if (state == 15) {
             for (String keyword : KEYWORDS) {
-                if (word.equals(keyword))
-                    state = 25;
+                if (word.equals(keyword)){
+                    if (word.equals("true") || word.equals("false")) state = 26;
+                    else state = 25;
+                }
             }
         }
 
@@ -298,6 +300,9 @@ public class Lexer {
                 break;
             case 25:
                 newToken = new Token(word, "KEYWORD", row);
+                break;
+            case 26:
+                newToken = new Token(word, "BOOLEAN", row);
                 break;
             default:
                 newToken = new Token(word, "ERROR", row, state);

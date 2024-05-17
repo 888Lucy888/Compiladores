@@ -1,6 +1,8 @@
 package com.lexer.Functionality;
 
+import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Set;
 import java.util.Stack;
 import java.util.Vector;
 
@@ -10,6 +12,7 @@ import com.lexer.ExtraModules.SymbolTableItem;
 
 public class SemanticAnalyzer {
     private static Hashtable<String, Vector<SymbolTableItem>> symbolTable = new Hashtable<>();
+    private static Set<String> functions = new HashSet<String>();
 
     public static Hashtable<String, Vector<SymbolTableItem>> getSymbolTable() {
         return symbolTable;
@@ -223,6 +226,27 @@ public class SemanticAnalyzer {
             return false;
         }
         return true;
+    }
+
+    public static String getVariableType(String id){
+        Vector<SymbolTableItem> items = symbolTable.get(id);
+        if (items == null) return "";
+        return items.get(0).getType();
+    }
+
+    // Check all function calls regardless of signature
+    // to see if a function of x name exists
+    // The program should then call PARAM 2 to identify
+    // the specific function if any
+    public static boolean CheckFunction(String id) {
+        for (String elem : functions) {
+            if (elem.equals(id)) return true;
+        }
+        return false;
+    }
+
+    public static void addFunction(String id) {
+        functions.add(id);
     }
 
     public static Stack<Token> getStack() {
