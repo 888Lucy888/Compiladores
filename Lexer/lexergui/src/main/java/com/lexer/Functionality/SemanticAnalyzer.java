@@ -257,4 +257,51 @@ public class SemanticAnalyzer {
         symbolTable.clear();
     }
 
+    private static int convertToDT(String dataType) {
+        switch(dataType) {
+            case "INTEGER":
+            case "int":
+                return INTEGER;
+            case "FLOAT":
+            case "float":
+                return FLOAT;
+            case "BOOLEAN":
+            case "boolean":
+                return BOOLEAN;
+            case "CHAR":
+            case "char":
+                return CHAR;
+            case "STRING":
+            case "string":
+                return STRING;
+            case "VOID":
+            case "void":
+                return VOID;
+        }
+        return -1;
+    }
+
+    private static String convertDTToString(int dataType) {
+        switch(dataType) {
+            case INTEGER: return "int";
+            case FLOAT: return "float";
+            case BOOLEAN: return "boolean";
+            case CHAR: return "char";
+            case STRING: return "string";
+            case VOID: return "void";
+            case ERROR: return "error";
+        }
+        return "error";
+    }
+
+    private static int checkOperationB(String type1, String type2, int op) {
+        int t1 = convertToDT(type1), t2 = convertToDT(type2);
+        if (!(op >= OP_Plus && op <= OP_Assignation)) return ERROR;
+        return cube[op][t2][t1];
+    }
+
+    public static String checkOperationBinary(String type1, String type2, int op) {
+        return convertDTToString(checkOperationB(type1, type2, op));
+    }
+
 }

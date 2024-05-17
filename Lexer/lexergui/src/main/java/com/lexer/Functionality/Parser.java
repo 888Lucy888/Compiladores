@@ -303,7 +303,7 @@ public class Parser {
         current_level = child.getParent();
     }
 
-    private static void RULE_FUNCTION_CALL() {
+    private static String RULE_FUNCTION_CALL() {
         TreeItem<String> child = new TreeItem<>("RULE FUNCTION");
         current_level.getChildren().add(child);
         current_level = child;
@@ -321,6 +321,7 @@ public class Parser {
         }
         //currentToken++;
         current_level = child.getParent();
+        return signature;
     }
 
     private static String RULE_PARAM_1(String signature){
@@ -390,7 +391,7 @@ public class Parser {
             for (String item : firstSet) {
                 if (tokens.get(currentToken).getToken().equals(item)) {
                     current_level.getChildren().add(new TreeItem<String>(tokens.get(currentToken).getWord()));
-                    signature += tokens.get(currentToken).getWord();
+                    signature += "_" + getProgDataType(tokens.get(currentToken));
                     currentToken++;
                     if (tokens.get(currentToken).getWord().equals(",")) {
                         current_level.getChildren().add(new TreeItem<String>(","));
@@ -632,7 +633,7 @@ public class Parser {
         current_level = child.getParent();
     }
 
-    private static void RULE_EXPRESSION(String scope) {
+    private static String RULE_EXPRESSION(String scope) {
         TreeItem<String> child = new TreeItem<>("EXPRESSION");
         current_level.getChildren().add(child);
         current_level = child;
@@ -702,7 +703,7 @@ public class Parser {
         current_level = child.getParent();
     }
 
-    private static void RULE_X(String scope) {
+    private static String RULE_X(String scope) {
         TreeItem<String> child = new TreeItem<>("RULE X");
         current_level.getChildren().add(child);
         current_level = child;
@@ -772,7 +773,7 @@ public class Parser {
         current_level = child.getParent();
     }
 
-    private static void RULE_Y(String scope) {
+    private static String RULE_Y(String scope) {
         TreeItem<String> child = new TreeItem<>("RULE Y");
         current_level.getChildren().add(child);
         current_level = child;
@@ -843,7 +844,7 @@ public class Parser {
         current_level = child.getParent();
     }
 
-    private static void RULE_R(String scope) {
+    private static String RULE_R(String scope) {
         TreeItem<String> child = new TreeItem<>("RULE R");
         current_level.getChildren().add(child);
         current_level = child;
@@ -920,7 +921,7 @@ public class Parser {
         current_level = child.getParent();
     }
 
-    private static void RULE_E(String scope) {
+    private static String RULE_E(String scope) {
         TreeItem<String> child = new TreeItem<>("RULE E");
         current_level.getChildren().add(child);
         current_level = child;
@@ -996,7 +997,7 @@ public class Parser {
         current_level = child.getParent();
     }
 
-    private static void RULE_A(String scope) {
+    private static String RULE_A(String scope) {
         TreeItem<String> child = new TreeItem<>("RULE A");
         current_level.getChildren().add(child);
         current_level = child;
@@ -1075,7 +1076,8 @@ public class Parser {
         current_level = child.getParent();
     }
 
-    private static void RULE_B(String scope) {
+    private static String RULE_B(String scope) {
+        String dataType = "";
         TreeItem<String> child = new TreeItem<>("RULE B");
         current_level.getChildren().add(child);
         current_level = child;
@@ -1111,17 +1113,19 @@ public class Parser {
         followSet.add(";");
 
         boolean error = true;
+        boolean symbol = false;
         for (String entry : firstSet) {
             if (entry.equals(tokens.get(currentToken).getWord()) || entry.equals(tokens.get(currentToken).getToken())) {
                 error = false;
                 if (entry.equals("-")) {
+                    symbol = true;
                     current_level.getChildren().add(new TreeItem<String>("-"));
                     currentToken++;
                 }
             }
         }
 
-        RULE_C(scope);
+        dataType = RULE_C(scope);
 
         if (error) {
             error(5);
@@ -1149,7 +1153,8 @@ public class Parser {
         current_level = child.getParent();
     }
 
-    private static void RULE_C(String scope) {
+    private static String RULE_C(String scope) {
+        String dataType = ""; // Store what type of data are we working with
         TreeItem<String> child = new TreeItem<>("RULE C");
         current_level.getChildren().add(child);
         current_level = child;
@@ -1190,7 +1195,7 @@ public class Parser {
             }
             if (isCurrentTokenValid() && tokens.get(currentToken).getWord().equals("(")) {
                 currentToken++;
-                RULE_EXPRESSION(scope);
+                dataType = RULE_EXPRESSION(scope);
             }
         }
 
@@ -1211,13 +1216,16 @@ public class Parser {
                 // Id is a function
                 if (tokens.get(currentToken + 1).getWord().equals("(")) {
                     if (!SemanticAnalyzer.CheckFunction(tokens.get(currentToken).getWord()))
-                        errorHandler.storeError("\nLine " + (tokens.get(currentToken).getLine() - 1) + ": Function " + tokens.get(currentToken).getWord() + " does not exist");
+                    errorHandler.storeError("\nLine " + (tokens.get(currentToken).getLine() - 1) + ": Function " + tokens.get(currentToken).getWord() + " does not exist");
                     currentToken++;
-                    RULE_FUNCTION_CALL();
+                    String name = RULE_FUNCTION_CALL();
+                    dataType = SemanticAnalyzer.getVariableType(name);
                 }
                 // ID is a variable
-                else if(!SemanticAnalyzer.CheckVariable(tokens.get(currentToken).getWord()))
+                else if(!SemanticAnalyzer.CheckVariable(tokens.get(currentToken).getWord())){
                     errorHandler.storeError("\nLine " + (tokens.get(currentToken).getLine() - 1) + ": Variable " + tokens.get(currentToken).getWord() + " does not exist");
+                    dataType = SemanticAnalyzer.getVariableType(tokens.get(currentToken).getWord());
+                }
             }
             currentToken++;
             error = true;
@@ -1231,7 +1239,7 @@ public class Parser {
         if (error) error(3);
 
         current_level = child.getParent();
-
+        return dataType;
     }
 
     private static boolean isVarType(String token_word) {
