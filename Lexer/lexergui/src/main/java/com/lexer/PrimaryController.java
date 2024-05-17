@@ -4,10 +4,13 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Hashtable;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Vector;
 
 import com.lexer.ExtraModules.ErrorHandler;
+import com.lexer.ExtraModules.SymbolTableItem;
 import com.lexer.Functionality.Lexer;
 import com.lexer.Functionality.Parser;
 import com.lexer.Functionality.SemanticAnalyzer;
@@ -38,8 +41,11 @@ public class PrimaryController {
     @FXML
     private TableView<TokenEntry> output;
     @FXML
+    private TableView<VariableEntry> variables;
+    @FXML
     private TreeView<String> treeView;
     private ObservableList<TokenEntry> entries = FXCollections.observableArrayList();
+    private ObservableList<VariableEntry> variableEntries = FXCollections.observableArrayList();
 
     @FXML
     public void openFile() {
@@ -104,6 +110,7 @@ public class PrimaryController {
         lexer.run();
         Vector<Token> tokens = lexer.getTokens();
         entries.clear();
+        variableEntries.clear();
 
         int errorCount = 0;
 
@@ -119,6 +126,15 @@ public class PrimaryController {
 
         output.setItems(entries);
         treeView.setRoot(Parser.parse());
+
+        Hashtable<String, Vector<SymbolTableItem>> variableList = SemanticAnalyzer.getSymbolTable();
+        for (Map.Entry<String, Vector<SymbolTableItem>> entry : variableList.entrySet()) {
+            for (SymbolTableItem item : entry.getValue()) {
+                variableEntries.add(new VariableEntry(entry.getKey(), item.getScope(), item.getType(), item.getValue()));
+            }
+        }
+        variables.setItems(variableEntries);
+
 
         terminal.setText("---------------- LEXER ----------------\n " +
                 "Words Found: " + tokens.size() + "\n Errors Found: " + errorCount + "\n Correct Rate: " +
