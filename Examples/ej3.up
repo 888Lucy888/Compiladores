@@ -1,0 +1,10 @@
+{
+int a;
+int b;
+int c;
+int d;
+if (a!=5){
+b=c+d;
+}
+print(a);
+}
