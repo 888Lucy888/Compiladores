@@ -1,0 +1,11 @@
+int w;
+
+int m(intx) {
+print("hola"); return 10;
+}
+
+void main(){
+print("main here");
+int y;
+y = m(5);
+}
