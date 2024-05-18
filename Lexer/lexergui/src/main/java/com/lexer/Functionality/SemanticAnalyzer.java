@@ -9,7 +9,6 @@ import java.util.Vector;
 import com.lexer.ExtraModules.ErrorHandler;
 import com.lexer.ExtraModules.SymbolTableItem;
 
-
 public class SemanticAnalyzer {
     private static Hashtable<String, Vector<SymbolTableItem>> symbolTable = new Hashtable<>();
     private static Set<String> functions = new HashSet<String>();
@@ -48,138 +47,137 @@ public class SemanticAnalyzer {
     public static final int VOID = 5;
     public static final int ERROR = -1;
 
-    private static int cube [][][] = 
-    {
-        // SUM
-        {
-            {INTEGER, FLOAT, ERROR, ERROR, ERROR, ERROR},
-            {FLOAT, FLOAT, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, STRING, ERROR, ERROR},
-            {ERROR, ERROR, STRING, STRING, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, BOOLEAN, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR}
-        },
-        // MINUS
-        {
-            {INTEGER, FLOAT, ERROR, ERROR, ERROR, ERROR},
-            {FLOAT, FLOAT, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, BOOLEAN, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR}
-        },
-        // MULTIPLICATION
-        {
-            {INTEGER, FLOAT, ERROR, ERROR, ERROR, ERROR},
-            {FLOAT, FLOAT, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, BOOLEAN, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR}
-        },
-        // DIVISION
-        {
-            {INTEGER, FLOAT, ERROR, ERROR, ERROR, ERROR},
-            {FLOAT, FLOAT, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR}
-        },
-        // AND
-        {
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, BOOLEAN, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR}
-        },
-        // OR
-        {
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, BOOLEAN, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR}
-        },
-        // NOT
-        {
-            {ERROR, ERROR, ERROR, ERROR, BOOLEAN, ERROR}
-        },
-        // LESSER THAN
-        {
-            {BOOLEAN, BOOLEAN, ERROR, ERROR, ERROR, ERROR},
-            {BOOLEAN, BOOLEAN, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR}
-        },
-        // GREATER THAN
-        {
-            {BOOLEAN, BOOLEAN, ERROR, ERROR, ERROR, ERROR},
-            {BOOLEAN, BOOLEAN, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR}
-        },
-        // LESSER OR EQUAL TO
-        {
-            {BOOLEAN, BOOLEAN, ERROR, ERROR, ERROR, ERROR},
-            {BOOLEAN, BOOLEAN, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR}
-        },
-        // GREATER OR EQUAL TO
-        {
-            {BOOLEAN, BOOLEAN, ERROR, ERROR, ERROR, ERROR},
-            {BOOLEAN, BOOLEAN, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR}
-        },
-        // EQUAL TO
-        {
-            {BOOLEAN, ERROR, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, BOOLEAN, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, BOOLEAN, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, BOOLEAN, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR}
-        },
-        // DIFFERENT THAN
-        {
-            {BOOLEAN, ERROR, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, BOOLEAN, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, BOOLEAN, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, BOOLEAN, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR}
-        },
-        // REMAINDER
-        {
-            {INTEGER, ERROR, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR}
-        },
-        // ASSIGNMENT
-        {
-            {INTEGER, ERROR, ERROR, ERROR, ERROR, ERROR},
-            {FLOAT, FLOAT, ERROR, ERROR, ERROR, ERROR},
-            {CHAR, ERROR, CHAR, ERROR, ERROR, ERROR},
-            {ERROR, ERROR, STRING, STRING, ERROR, ERROR},
-            {BOOLEAN, ERROR, ERROR, ERROR, BOOLEAN, ERROR},
-            {ERROR, ERROR, ERROR, ERROR, ERROR, ERROR}
-        }
+    private static int cube[][][] = {
+            // SUM 0
+            {
+                    { INTEGER, FLOAT, ERROR, ERROR, ERROR, ERROR },
+                    { FLOAT, FLOAT, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, STRING, ERROR, ERROR },
+                    { ERROR, ERROR, STRING, STRING, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, BOOLEAN, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR }
+            },
+            // MINUS 1
+            {
+                    { INTEGER, FLOAT, ERROR, ERROR, ERROR, ERROR },
+                    { FLOAT, FLOAT, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, BOOLEAN, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR }
+            },
+            // MULTIPLICATION 2
+            {
+                    { INTEGER, FLOAT, ERROR, ERROR, ERROR, ERROR },
+                    { FLOAT, FLOAT, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, BOOLEAN, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR }
+            },
+            // DIVISION 3
+            {
+                    { INTEGER, FLOAT, ERROR, ERROR, ERROR, ERROR },
+                    { FLOAT, FLOAT, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR }
+            },
+            // AND 4
+            {
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, BOOLEAN, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR }
+            },
+            // OR 5
+            {
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, BOOLEAN, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR }
+            },
+            // NOT 6
+            {
+                    { ERROR, ERROR, ERROR, ERROR, BOOLEAN, ERROR }
+            },
+            // LESSER THAN 7
+            {
+                    { BOOLEAN, BOOLEAN, ERROR, ERROR, ERROR, ERROR },
+                    { BOOLEAN, BOOLEAN, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR }
+            },
+            // GREATER THAN 8
+            {
+                    { BOOLEAN, BOOLEAN, ERROR, ERROR, ERROR, ERROR },
+                    { BOOLEAN, BOOLEAN, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR }
+            },
+            // LESSER OR EQUAL TO 9
+            {
+                    { BOOLEAN, BOOLEAN, ERROR, ERROR, ERROR, ERROR },
+                    { BOOLEAN, BOOLEAN, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR }
+            },
+            // GREATER OR EQUAL TO 10
+            {
+                    { BOOLEAN, BOOLEAN, ERROR, ERROR, ERROR, ERROR },
+                    { BOOLEAN, BOOLEAN, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR }
+            },
+            // EQUAL TO 11
+            {
+                    { BOOLEAN, ERROR, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, BOOLEAN, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, BOOLEAN, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, BOOLEAN, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR }
+            },
+            // DIFFERENT THAN 12
+            {
+                    { BOOLEAN, ERROR, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, BOOLEAN, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, BOOLEAN, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, BOOLEAN, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR }
+            },
+            // REMAINDER 13
+            {
+                    { INTEGER, ERROR, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR }
+            },
+            // ASSIGNMENT 14
+            {
+                    { INTEGER, ERROR, ERROR, ERROR, ERROR, ERROR },
+                    { FLOAT, FLOAT, ERROR, ERROR, ERROR, ERROR },
+                    { CHAR, ERROR, CHAR, ERROR, ERROR, ERROR },
+                    { ERROR, ERROR, STRING, STRING, ERROR, ERROR },
+                    { BOOLEAN, ERROR, ERROR, ERROR, BOOLEAN, ERROR },
+                    { ERROR, ERROR, ERROR, ERROR, ERROR, ERROR }
+            }
     };
 
     public static void AddVariable(String scope, String type, String id, String value) {
@@ -206,7 +204,7 @@ public class SemanticAnalyzer {
         AddVariable("global", type, id, "");
     }
 
-    public static boolean CheckVariable(String scope, String id){
+    public static boolean CheckVariable(String scope, String id) {
         Vector<SymbolTableItem> items = symbolTable.get(id);
         if (items == null) {
             return false;
@@ -220,7 +218,7 @@ public class SemanticAnalyzer {
         }
     }
 
-    public static boolean CheckVariable(String id){
+    public static boolean CheckVariable(String id) {
         Vector<SymbolTableItem> items = symbolTable.get(id);
         if (items == null) {
             return false;
@@ -228,9 +226,10 @@ public class SemanticAnalyzer {
         return true;
     }
 
-    public static String getVariableType(String id){
+    public static String getVariableType(String id) {
         Vector<SymbolTableItem> items = symbolTable.get(id);
-        if (items == null) return "";
+        if (items == null)
+            return "";
         return items.get(0).getType();
     }
 
@@ -240,7 +239,8 @@ public class SemanticAnalyzer {
     // the specific function if any
     public static boolean CheckFunction(String id) {
         for (String elem : functions) {
-            if (elem.equals(id)) return true;
+            if (elem.equals(id))
+                return true;
         }
         return false;
     }
@@ -253,12 +253,12 @@ public class SemanticAnalyzer {
         return stack;
     }
 
-    public static void clearVariables(){
+    public static void clearVariables() {
         symbolTable.clear();
     }
 
     private static int convertToDT(String dataType) {
-        switch(dataType) {
+        switch (dataType) {
             case "INTEGER":
             case "int":
                 return INTEGER;
@@ -282,22 +282,41 @@ public class SemanticAnalyzer {
     }
 
     private static String convertDTToString(int dataType) {
-        switch(dataType) {
-            case INTEGER: return "int";
-            case FLOAT: return "float";
-            case BOOLEAN: return "boolean";
-            case CHAR: return "char";
-            case STRING: return "string";
-            case VOID: return "void";
-            case ERROR: return "error";
+        switch (dataType) {
+            case INTEGER:
+                return "int";
+            case FLOAT:
+                return "float";
+            case BOOLEAN:
+                return "boolean";
+            case CHAR:
+                return "char";
+            case STRING:
+                return "string";
+            case VOID:
+                return "void";
+            case ERROR:
+                return "error";
         }
         return "error";
     }
 
     private static int checkOperationB(String type1, String type2, int op) {
         int t1 = convertToDT(type1), t2 = convertToDT(type2);
-        if (!(op >= OP_Plus && op <= OP_Assignation)) return ERROR;
-        return cube[op][t2][t1];
+        if (t1 == -1 || t2 == -1) {
+            System.err.println("Invalid type conversion: " + type1 + " -> " + t1 + ", " + type2 + " -> " + t2);
+            return ERROR;
+        }
+        if (op < OP_Plus || op > OP_Assignation) {
+            System.err.println("Invalid operation code: " + op);
+            return ERROR;
+        }
+        try {
+            return cube[op][t2][t1];
+        } catch (ArrayIndexOutOfBoundsException e) {
+            System.err.println("Array index out of bounds: op=" + op + ", t1=" + t1 + ", t2=" + t2);
+            throw e;
+        }
     }
 
     public static String checkOperationBinary(String type1, String type2, int op) {
