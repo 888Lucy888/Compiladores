@@ -1,0 +1,15 @@
+{
+int x;
+x = 0;
+void myFunc(int a){
+while(x<5){
+if(x%2==0){
+print("hola");
+}else{
+print("bye");
+}
+x = x+1;
+}
+print("end");
+}
+}
