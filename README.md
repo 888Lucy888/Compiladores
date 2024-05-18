@@ -1,4 +1,4 @@
-# Compiler
+# Compiler:
 
 ## Lexer
 
