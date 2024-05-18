@@ -1,14 +1,14 @@
 # Compiler:
 
-## Lexer
+## - Lexer
 
-## Parser v1.0
+## - Parser v1.0
 
-## Parser v2.0
+## - Parser v2.0
 
-## Semantic Analyzer
+## - Semantic Analyzer
 
-## Code Generator WIP
+## - Code Generator WIP
 
 ### Team:
 - Jessica Fernanda Isunza López
